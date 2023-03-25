@@ -1,0 +1,39 @@
+name: tabular_machine_learning
+channels:
+  - conda-forge
+  - nodefault
+
+dependencies:
+  # base env
+  - python =3.11
+  - jupyterlab
+  - nodejs
+  - ipympl
+  - jupyterlab-lsp-python
+  - python-lsp-server
+  - conda
+  - mamba
+  - pip
+
+  # data libraries
+  - pandas
+  - numpy
+  - scipy
+  - pyarrow
+
+  # ml libraries
+  - scikit-learn
+  - optuna
+  - xgboost
+  - catboost
+  - lightgbm
+  - pytorch
+
+  # viz libraries
+  - seaborn
+  - holoviews
+  - hvplot
+  - seaborn
+
+
+  
