@@ -212,8 +212,8 @@ class CatBoostClassificationModel(MLModel):
 
         if params['bootstrap_type'] == 'Bayesian':
             params['bagging_temperature'] = trial.suggest_float(
-                'bagging_temperatur', 0, 10)
-        elif params['bootstrap_typ'] == 'Bernoulli':
+                'bagging_temperature', 0, 10)
+        elif params['bootstrap_type'] == 'Bernoulli':
             params['subsample'] = trial.suggest_float('subsample', 0.1, 1)
 
         logging.info(f'\n----------------------\n{params}')
