@@ -85,7 +85,7 @@ def get_ensemble_prediction(
     )
 
 
-def regression_k_fold_cv(
+def k_fold_cv(
     x_data: pd.DataFrame,
     y_data: pd.Series,
     model_classes: Dict[str, MLModel],
@@ -254,7 +254,7 @@ def performance_scoring(
     K-fold CV wrapper for Optuna optimization
     """
     # run K-fold CV and get scores
-    kfolds_output = regression_k_fold_cv(
+    kfolds_output = k_fold_cv(
         x_data=features,
         y_data=target,
         model_classes={model.__name__: model},
