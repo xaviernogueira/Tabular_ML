@@ -88,7 +88,6 @@ class CatBoostRegressionModel(MLModel):
         metric_function: callable,
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-        peaks_indices: Optional[List[int]] = None,
         random_state: Optional[int] = None,
     ) -> float:
         """
@@ -117,7 +116,6 @@ class CatBoostRegressionModel(MLModel):
             model=CatBoostRegressionModel,
             features=features,
             target=target,
-            peaks_indices=peaks_indices,
             model_params=params,
             k_folds=kfolds,
             metric_function=metric_function,
@@ -195,7 +193,6 @@ class CatBoostClassificationModel(MLModel):
         metric_function: callable,
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-        peaks_indices: Optional[List[int]] = None,
         random_state: Optional[int] = None,
     ) -> float:
         """
@@ -225,7 +222,6 @@ class CatBoostClassificationModel(MLModel):
             model=CatBoostClassificationModel,
             features=features,
             target=target,
-            peaks_indices=peaks_indices,
             model_params=params,
             k_folds=kfolds,
             metric_function=metric_function,
