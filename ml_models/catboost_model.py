@@ -1,3 +1,6 @@
+"""
+CatBoost regression.
+"""
 import catboost
 import logging
 import pandas as pd

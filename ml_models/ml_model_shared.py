@@ -1,4 +1,4 @@
-"""Stores shared classes and functions for all ML models"""
+"""Stores shared MLModel ABC, as well as functions for all MLModel implementations"""
 import dataclasses
 import time
 import logging
@@ -235,11 +235,15 @@ def regression_k_fold_cv(
     return out_class
 
 
+def smape_score() -> float:
+    """Custom SMAPE score to optimize for"""
+    raise NotImplementedError
+
+
 def performance_scoring(
     model: MLModel,
     features: pd.DataFrame,
     target: pd.Series,
-    peaks_indices: List[int],
     regressor_params: Dict[str, Union[float, int, str]],
     k_folds: int,
     metric_function: callable,
@@ -248,8 +252,7 @@ def performance_scoring(
     random_state: Optional[int] = None,
 ) -> float:
     """
-    GLWA ML specific performance scoring.
-    Switched to MAE evaluation.
+    K-fold CV wrapper for Optuna optimization
     """
     # run K-fold CV and get scores
     kfolds_output = regression_k_fold_cv(
@@ -258,6 +261,7 @@ def performance_scoring(
         model_classes={model.__name__: model},
         model_params={model.__name__: regressor_params},
         weights_data=weights,
+        categorical_features=categorical_features,
         n_splits=k_folds,
         metric_function=metric_function,
         random_state=random_state,
@@ -265,35 +269,7 @@ def performance_scoring(
     adj_score = kfolds_output.adj_model_scores[model.__name__]
     logging.info(f'K-fold CV output: {dataclasses.asdict(kfolds_output)}')
 
-    # make prediction for the peaks
-    if peaks_indices is not None:
-        # train a final model
-        logging.info(
-            f'Training full model to predict peaks - {datetime.now()}')
-        peaks_predicts = model.make_predictions(
-            features,
-            target,
-            features.iloc[peaks_indices],
-            regressor_params,
-            weights_train=weights,
-            categorical_features=categorical_features,
-        )
-
-        peaks_score = metric_function(
-            target.iloc[peaks_indices].to_numpy(),
-            peaks_predicts,
-        )
-        # return the average
-        score = float(
-            (peaks_score + adj_score) / 2
-        )
-        logging.info(
-            f'Done. Peaks {metric_function.__name__} = {peaks_score}, average score is {score}'
-        )
-        return score
-
-    else:
-        return adj_score
+    return adj_score
 
 
 def find_optimal_parameters(

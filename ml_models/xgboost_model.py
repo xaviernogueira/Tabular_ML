@@ -1,3 +1,6 @@
+"""
+XGBoost Regression.
+"""
 import xgboost
 import logging
 import pandas as pd
