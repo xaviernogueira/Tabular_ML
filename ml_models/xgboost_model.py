@@ -19,11 +19,7 @@ from ml_models.ml_model_shared import (
 
 
 class XGBoostRegressionModel(MLModel):
-    """Use only if we find a way to get the rating curves!
 
-    One hot encoding 15 categories is a bit wack.
-    That said we can try "Label encoding" if we order them from up to downstream.
-    """
     @staticmethod
     def train_model(
         x_train: pd.DataFrame,
@@ -101,6 +97,8 @@ class XGBoostRegressionModel(MLModel):
             enable_categorical=bool(categorical_features),
         )
 
+        # TODO: enable custom eval function!
+
         # train the model
         xgb_model = XGBoostRegressionModel.train_model(
             x_train,
@@ -126,7 +124,7 @@ class XGBoostRegressionModel(MLModel):
         random_state: Optional[int] = None,
     ) -> float:
         """
-        CatBoost parameter search space for optuna.
+        XGBoost parameter search space for optuna.
         """
 
         # fill in more via https://catboost.ai/en/docs/references/training-parameters/common#bootstrap_type
