@@ -52,7 +52,6 @@ class MLModel(abc.ABC):
         metric_function: callable,
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-        peaks_indices: Optional[List[int]] = None,
         random_state: Optional[int] = None,
     ) -> float:
         raise NotImplementedError
@@ -244,7 +243,7 @@ def performance_scoring(
     model: MLModel,
     features: pd.DataFrame,
     target: pd.Series,
-    regressor_params: Dict[str, Union[float, int, str]],
+    model_params: Dict[str, Union[float, int, str]],
     k_folds: int,
     metric_function: callable,
     weights: Optional[pd.Series] = None,
@@ -259,7 +258,7 @@ def performance_scoring(
         x_data=features,
         y_data=target,
         model_classes={model.__name__: model},
-        model_params={model.__name__: regressor_params},
+        model_params={model.__name__: model_params},
         weights_data=weights,
         categorical_features=categorical_features,
         n_splits=k_folds,
@@ -276,15 +275,14 @@ def find_optimal_parameters(
     model: MLModel,
     features: pd.DataFrame,
     target: pd.Series,
+    metric_function: callable,
+    direction: Optional[str] = None,
     n_trials: int = 20,
     timeout: Optional[int] = None,
     kfolds: int = 5,
-    metric_function: callable = sklearn.metrics.mean_absolute_error,
     weights: Optional[pd.Series] = None,
     categorical_features: Optional[List[str]] = None,
-    peaks_indices: Optional[List[int]] = None,
     random_state: Optional[int] = None,
-    direction: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Runs optuna optimization for a MLModel"""
 
@@ -317,15 +315,17 @@ def find_optimal_parameters(
         metric_function=metric_function,
         weights=weights,
         categorical_features=categorical_features,
-        peaks_indices=peaks_indices,
         random_state=random_state,
     )
 
-    # run the study
-    if str(metric_function.__name__) == 'mean_absolute_error':
-        direction = 'minimize'
-    elif str(metric_function.__name__) == 'r2_score':
-        direction = 'maximize'
+    # assume metric direction when possible
+    direction_dict = {
+        'mean_absolute_error': 'minimize',
+        'log_loss': 'minimize',
+        'r2_score': 'maximize',
+    }
+    if str(metric_function.__name__) in direction_dict.keys():
+        direction = direction_dict[str(metric_function.__name__)]
     else:
         logging.warn(
             f'Optimal direction cannot be inferred from metric_function: '
@@ -333,6 +333,8 @@ def find_optimal_parameters(
             f'maximize or minimize. Default is minimize!'
         )
         direction = 'minimize'
+
+    # run the study
     study = optuna.create_study(direction=direction)
     study.optimize(
         objective_func,

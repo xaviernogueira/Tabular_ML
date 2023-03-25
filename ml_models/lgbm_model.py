@@ -132,7 +132,7 @@ class LightGBMRegressionModel(MLModel):
             features=features,
             target=target,
             peaks_indices=peaks_indices,
-            regressor_params=params,
+            model_params=params,
             k_folds=kfolds,
             metric_function=metric_function,
             weights=weights,

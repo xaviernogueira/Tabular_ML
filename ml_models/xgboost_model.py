@@ -120,7 +120,6 @@ class XGBoostRegressionModel(MLModel):
         metric_function: callable,
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-        peaks_indices: Optional[List[int]] = None,
         random_state: Optional[int] = None,
     ) -> float:
         """
@@ -150,8 +149,7 @@ class XGBoostRegressionModel(MLModel):
             model=XGBoostRegressionModel,
             features=features,
             target=target,
-            peaks_indices=peaks_indices,
-            regressor_params=params,
+            model_params=params,
             k_folds=kfolds,
             metric_function=metric_function,
             weights=weights,
