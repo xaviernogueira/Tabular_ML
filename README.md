@@ -15,6 +15,14 @@ Kaggle_Predicting-Parkinson-Disease-Progression
 
 All together, with clever FE, optuna optimization overnight, and testing different random states we can get a great score.
 
+# Workflow ideas
+* Figure out if KNN imputation will help fill nans.
+* Identify a subset of protien/peptide data to use. Maybe with high variability, correlation to outcomes, reference in medical literature, but with a strong amount of observations.
+* We may need to train 16 models. One for each UDRS score X month gap. Alternatively we can just train 4 core models, and then one simple linear regression model to adjust for months.
+* **Seems like we should start by making a classification model to predict whether a patient is on/off medication based on protien data.**
+    * If it works well, we can include the predicted values as a feature.
+    * We should train a quick and dirty model predicting UDRS (where the medication has an impact) on rows w/o medication status. If it shows up as a prominent feature across K-Folds then we keep it. 
+
 # Contents
 ## `inputs` and `outputs`
 Self explanatory. The `inputs` directory stores training data downloaded from [Kaggle](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data). The `outputs` directory stores prediction output `.parquet` for quick reloading (as necessary...may not be used).
