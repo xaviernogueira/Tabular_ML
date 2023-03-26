@@ -1,7 +1,8 @@
 name: tabular_machine_learning
 channels:
   - conda-forge
-  - nodefault
+  - pytorch
+  - nodefaults
 
 dependencies:
   # base env
@@ -9,11 +10,8 @@ dependencies:
   - jupyterlab
   - nodejs
   - ipympl
-  - jupyterlab-lsp-python
+  - jupyterlab-lsp
   - python-lsp-server
-  - conda
-  - mamba
-  - pip
 
   # data libraries
   - pandas
@@ -34,6 +32,12 @@ dependencies:
   - holoviews
   - hvplot
   - seaborn
+
+  # library managment
+  - conda
+  - conda-build
+  - mamba
+  - pip
 
 
   
