@@ -9,6 +9,7 @@ from optuna.trial import Trial
 from typing import (
     Dict,
     List,
+    Tuple,
     Optional,
     Any,
 )
@@ -59,8 +60,8 @@ class CatBoostRegressionModel(MLModel):
         model_params: Dict[str, Any],
         weights_train: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-    ) -> np.ndarray:
-        """Trains a XGBoost model and makes predictions"""
+    ) -> Tuple[catboost.CatBoostRegressor, np.ndarray]:
+        """Trains a CatBoost model and makes predictions"""
         # load in testing data
         test_data_pool = catboost.Pool(
             data=x_test,
@@ -77,7 +78,10 @@ class CatBoostRegressionModel(MLModel):
         )
 
         # return predictions array
-        return catboost_model.predict(test_data_pool)
+        return (
+            catboost_model,
+            catboost_model.predict(test_data_pool),
+        )
 
     @staticmethod
     def objective(
@@ -164,7 +168,7 @@ class CatBoostClassificationModel(MLModel):
         model_params: Dict[str, Any],
         weights_train: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-    ) -> np.ndarray:
+    ) -> Tuple[catboost.CatBoostClassifier, np.ndarray]:
         """Trains a XGBoost model and makes predictions"""
         # load in testing data
         test_data_pool = catboost.Pool(
@@ -182,7 +186,10 @@ class CatBoostClassificationModel(MLModel):
         )
 
         # return predictions array
-        return catboost_model.predict(test_data_pool)[:, 1]
+        return (
+            catboost_model,
+            catboost_model.predict(test_data_pool)[:, 1],
+        )
 
     @staticmethod
     def objective(

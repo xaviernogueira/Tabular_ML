@@ -8,6 +8,7 @@ import numpy as np
 from optuna.trial import Trial
 from typing import (
     Dict,
+    Tuple,
     Optional,
     Any,
     List,
@@ -72,7 +73,7 @@ class LightGBMRegressionModel(MLModel):
         model_params: Dict[str, Any],
         weights_train: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-    ) -> np.ndarray:
+    ) -> Tuple[lightgbm.Booster, np.ndarray]:
 
         # load in testing data
         test_data_ds = lightgbm.Dataset(
@@ -90,7 +91,10 @@ class LightGBMRegressionModel(MLModel):
         )
 
         # return prediction array
-        return lgbm_model.predict(test_data_ds)
+        return (
+            lgbm_model,
+            lgbm_model.predict(test_data_ds),
+        )
 
     @staticmethod
     def objective(

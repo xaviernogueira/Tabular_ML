@@ -8,6 +8,7 @@ import numpy as np
 from optuna.trial import Trial
 from typing import (
     Dict,
+    Tuple,
     Optional,
     Any,
     List,
@@ -83,7 +84,7 @@ class XGBoostRegressionModel(MLModel):
         model_params: Dict[str, Any],
         weights_train: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-    ) -> np.ndarray:
+    ) -> Tuple[xgboost.Booster, np.ndarray]:
 
         # deal with testing categorical features
         if categorical_features is not None:
@@ -109,7 +110,10 @@ class XGBoostRegressionModel(MLModel):
         )
 
         # return prediction array
-        return xgb_model.predict(test_data_matrix)
+        return (
+            xgb_model,
+            xgb_model.predict(test_data_matrix),
+        )
 
     @staticmethod
     def objective(

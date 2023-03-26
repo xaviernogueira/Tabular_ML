@@ -14,6 +14,7 @@ from typing import (
     Union,
     List,
     Dict,
+    Tuple,
     Optional,
     Any,
 )
@@ -40,7 +41,7 @@ class MLModel(abc.ABC):
         model_params: Dict[str, Any],
         weights_train: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-    ) -> np.ndarray:
+    ) -> Tuple[object, np.ndarray]:
         raise NotImplementedError
 
     @abc.abstractclassmethod
@@ -70,6 +71,8 @@ class KFoldOutput:
     raw_model_scores: Dict[str, float]  # model names as keys
     adj_model_scores: Dict[str, float]  # model names as keys
     model_test_losses: Dict[str, List[float]]  # model names as keys
+    # k fold index as keys
+    model_objects_by_fold = Dict[str, Dict[str, object]]
     ensemble_raw_score: float
     ensemble_adj_score: float
     run_time: int
@@ -128,6 +131,7 @@ def k_fold_cv(
     model_test_losses = {}
     raw_model_scores = {}
     adj_model_scores = {}
+    model_objects_by_fold = {}
 
     model_names = list(model_classes.keys())
 
@@ -170,11 +174,12 @@ def k_fold_cv(
 
         # get predictions for each model, calculate score
         model_predictions = {}
+        model_objects = {}
         for model_name, model_class in model_classes.items():
             logging.info(f'Split {i} | {model_name} - {datetime.now()}')
             params = model_params[model_name].copy()
 
-            model_predictions[model_name] = model_class.make_predictions(
+            model_objects[model_name], model_predictions[model_name] = model_class.make_predictions(
                 x_train,
                 y_train,
                 x_test,
@@ -190,6 +195,8 @@ def k_fold_cv(
                     **metric_function_kwargs,
                 ),
             )
+        # store model objects from the K-fold
+        model_objects_by_fold[i] = model_objects
 
         # get ensemble prediction, calculate score
         ensemble_preds = get_ensemble_prediction(
@@ -226,6 +233,7 @@ def k_fold_cv(
         raw_model_scores=raw_model_scores,
         adj_model_scores=adj_model_scores,
         model_test_losses=model_test_losses,
+        model_objects_by_fold=model_objects_by_fold,
         ensemble_raw_score=raw_model_scores['ensemble'],
         ensemble_adj_score=adj_model_scores['ensemble'],
         run_time=p2-p1,
