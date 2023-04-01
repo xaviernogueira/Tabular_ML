@@ -1,12 +1,11 @@
 name: tabular_machine_learning
 channels:
   - conda-forge
-  - pytorch
   - nodefaults
 
 dependencies:
   # base env
-  - python =3.11
+  - python >=3.10
   - jupyterlab
   - nodejs
   - ipympl
@@ -25,7 +24,6 @@ dependencies:
   - xgboost
   - catboost
   - lightgbm
-  - pytorch
 
   # viz libraries
   - seaborn
