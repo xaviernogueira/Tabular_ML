@@ -19,7 +19,7 @@ from ml_model_shared import (
 )
 
 
-class LinearRegressor(MLModel):
+class LinearRegressionModel(MLModel):
 
     @staticmethod
     def train_model(
@@ -56,7 +56,7 @@ class LinearRegressor(MLModel):
         # ordinally encode categorical features?
 
         # train model
-        model = LinearRegressor.train_model(
+        model = LinearRegressionModel.train_model(
             x_train,
             y_train,
             model_params,
@@ -171,7 +171,7 @@ class RidgeRegression(MLModel):
         )
 
 
-class LassoRegressor(MLModel):
+class LassoRegressionModel(MLModel):
 
     @staticmethod
     def train_model(
@@ -209,7 +209,7 @@ class LassoRegressor(MLModel):
         # one-hot-encode encode test categorical features
 
         # train model
-        model = LassoRegressor.train_model(
+        model = LassoRegressionModel.train_model(
             x_train,
             y_train,
             model_params,
@@ -241,7 +241,7 @@ class LassoRegressor(MLModel):
         }
 
         return performance_scoring(
-            model_class=LassoRegressor,
+            model_class=LassoRegressionModel,
             features=features,
             target=target,
             kfolds=kfolds,
@@ -253,7 +253,7 @@ class LassoRegressor(MLModel):
         )
 
 
-class ElasticNetRegressor(MLModel):
+class ElasticNetRegressionModel(MLModel):
 
     @staticmethod
     def train_model(
@@ -291,7 +291,7 @@ class ElasticNetRegressor(MLModel):
         # one-hot-encode encode test categorical features
 
         # train model
-        model = ElasticNetRegressor.train_model(
+        model = ElasticNetRegressionModel.train_model(
             x_train,
             y_train,
             model_params,
@@ -324,7 +324,7 @@ class ElasticNetRegressor(MLModel):
         }
 
         return performance_scoring(
-            model_class=ElasticNetRegressor,
+            model_class=ElasticNetRegressionModel,
             features=features,
             target=target,
             kfolds=kfolds,
@@ -336,7 +336,7 @@ class ElasticNetRegressor(MLModel):
         )
 
 
-class BayesianRidgeRegressor(MLModel):
+class BayesianRidgeRegressionModel(MLModel):
 
     @staticmethod
     def train_model(
@@ -374,7 +374,7 @@ class BayesianRidgeRegressor(MLModel):
         # one-hot-encode encode test categorical features
 
         # train model
-        model = BayesianRidgeRegressor.train_model(
+        model = BayesianRidgeRegressionModel.train_model(
             x_train,
             y_train,
             model_params,
@@ -410,7 +410,7 @@ class BayesianRidgeRegressor(MLModel):
         }
 
         return performance_scoring(
-            model_class=BayesianRidgeRegressor,
+            model_class=BayesianRidgeRegressionModel,
             features=features,
             target=target,
             kfolds=kfolds,
