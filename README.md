@@ -1,33 +1,11 @@
-Kaggle_Predicting-Parkinson-Disease-Progression
-================================================
- A repo to store my attempt at the AMP Parkinson's Disease Progression Kaggle AI/ML competition. See https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/overview
+Tabular_MachineLearning_Projects
+=================================
+A repo to store my tabular machine learning code and pet-projects. Specific projects (such as a Kaggle competition) will be stored in their own sub-directory.
 
-# To-Do
-*** Enable custom loss function (i.e. SMAPE), and use in training (where possible).**
-    * This should be passed in as a model_param, such that we can evaluate if training for SMAPE is even beneficial across K-Folds.
-* Finish our concrete MLModel implementations.
-* Do some EDA, without reinventing the wheel, and make public.
-* Automate new logging files with a datetime stamp.
-* Consider stratified K-Fold!
-* Work on feature engineering.
-* Set things up for GPU when possible.
-* Use Kaggle `Gist` syntax to import our repo after making it public.
-
-All together, with clever FE, optuna optimization overnight, and testing different random states we can get a great score.
-
-# Workflow ideas
-* Figure out if KNN imputation will help fill nans.
-* Identify a subset of protien/peptide data to use. Maybe with high variability, correlation to outcomes, reference in medical literature, but with a strong amount of observations.
-* We may need to train 16 models. One for each UDRS score X month gap. Alternatively we can just train 4 core models, and then one simple linear regression model to adjust for months.
-* **Seems like we should start by making a classification model to predict whether a patient is on/off medication based on protien data.**
-    * If it works well, we can include the predicted values as a feature.
-    * We should train a quick and dirty model predicting UDRS (where the medication has an impact) on rows w/o medication status. If it shows up as a prominent feature across K-Folds then we keep it. 
+To run this code, start by cloning the conda environment stored in `environment.yml`. If any of this brings value to you, do me a solid and give this repo a star!
 
 # Contents
-## `inputs` and `outputs`
-Self explanatory. The `inputs` directory stores training data downloaded from [Kaggle](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data). The `outputs` directory stores prediction output `.parquet` for quick reloading (as necessary...may not be used).
-
-## `ml_models`
+## `/ml_models`
 In order to enable experimentation, I defined  the Abstract Base Class `MLModel` in `ml_model_shared.py`, which allows all models implementing it's signature to be swapped interchangeably within K-Fold CV, model ensembles, and `optuna` hyperparameter optimization. 
 
 Each concrete implementations of `MLModel` has the following:
@@ -35,13 +13,33 @@ Each concrete implementations of `MLModel` has the following:
 * `make_predictions()` - trains a model and returns predictions on a testing X `pandas.DataFrame` as a `numpy.array`.
 * `objective()` - The name is misleading somewhat to align with `optuna` conventions. This function takes an `optuna.trial.Trial` as an argument and returns a performance score defined in `ml_model_shared.py`. The "meat" of the function defines the hyperparameter search space for a given model.
 
-I implemented the following concrete implementations of `MLModel`, each stored in it's own sub-module:
-* `ml_models.lasso_model.LassoLinearRegressor`
-* `ml_models.catboost_model.CatBoostRegressor` - **done**
-* `ml_models.xgboost_model.XGBoostRegressor`- **done**
-* `ml_models.lgbm_model.LightGBMRegressor`
-* `ml_models.svr_model.SupportVectorRegressor`
-* `ml_models.nn_model.NeuralNetworkRegressor`
+In `ml_model_shared` I also stored evaluation functions that accept any concrete implementation of `MLModel`:
+* `k_fold_cv()` runs K-Fold Cross Validation and stores all relevant outputs including model instances in a `KFoldOutput` python `dataclasses.dataclass` instance.
+* `find_optimal_parameters()` and `performance_scoring()` work together to enable an `optuna` search of the hyperaparameter space with a given scoring metric. Note that the mean K-Fold score +/- (depending on metric polarity) the standard deviation between folds is used.
 
-## `code_and_notebooks`
+I implemented the following concrete implementations of `MLModel`, each stored in it's own sub-module:
+
+**CatBoost:**
+* `catboost_model.CatBoostRegressionModel`
+* `catboost_model.CatBoostClassificationModel`
+
+**XGBoost:**
+* `xgboost_model.XGBoostRegressionModel`
+
+**LightGBM:**
+* `lgbm_model.LightGBMRegressionModel`
+
+**Sklearn Linear Models:**
+* `linear_models.LinearRegressionModel`
+* `linear_models.RidgeRegressionModel`
+* `linear_models.LassoRegressionModel`
+* `linear_models.ElasticNetRegressionModel`
+* `linear_models.BayesianRidgeRegressionModel`
+
+**Support Vector Models:**
+* `svr_model.SupportVectorRegressionModel` (not implemented)
+
+**Neural Network Models:**
+* `nn_model.NeuralNetworkRegressionModel` (not implemented)
+
 
