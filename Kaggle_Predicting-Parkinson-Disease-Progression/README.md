@@ -2,23 +2,25 @@
 
 A repo to store my attempt at the AMP Parkinson's Disease Progression Kaggle AI/ML competition. See the [competition overview](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/overview).
 
+## Methodology (so far)
+### `NB1_PreProcessing_Data.ipynb`
+1. Concat the supplemental clinical data (no associated Prot/Pep data) to the main clinical data. This is done to help train future predictions.
+2. Pivot protien and peptide data such that each row is a unique visit_id.
+3. Create all labels we will need to predict for by passing future visit data forward to a given visit, and renaming the visit specific columns to match our submission format (i.e., updrs_2 -> updrs_2_plus_0_months).
+4. Use both Iterative and KNN imputation to fill in nans for both the Protien and Peptide data. Save as .parquet files.
+5. Create a .parquet file that stores missing value locations for Protein and Peptide data. This will be used in future notebooks to adjust training weights.
 
-## NOTES
-* Imputation (especially across a clinical visit data row) will be key.
-* We will only be expected to make predictions using visits with Protien/Peptide data.
-* We will be using the data from a given month (plus any previous months) to make future predictions at different month steps.
-* This means we may want to train a future looking model that is different from the same visit model since we can incorperate time series based features (change over time of a peptide for example).
-* Supplemental clinical data is really just to train month step models.
+## Directory Organization
+Our main workflow notebooks will be stored in the parent directory and labeled by their order (i.e. 'NB1_' => notebook 1). Other sub-directories are as follows.
 
-## Contents
+* **`raw_inputs`-** Self explanatory. Stores training data downloaded from [Kaggle](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data). 
 
-### `inputs` and `outputs`
+* **`prepped_inputs`-** Stores model input files (i.e. a training table) after pre-processing or feature engineering.
 
-Self explanatory. The `inputs` directory stores training data downloaded from [Kaggle](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data). The `outputs` directory stores prediction output `.parquet` for quick reloading (as necessary...may not be used).
+* **`submissions`-** Stores submission `.csv` files.
 
-### `code_and_notebooks`
+* **`competition_provided_code`-** Stores code provided by the competition.
 
-* Add code link here!
 
 ## To-Do
 
@@ -42,4 +44,11 @@ All together, with clever FE, optuna optimization overnight, and testing differe
 * We may need to train 16 models. One for each UDRS score X month gap. Alternatively we can just train 4 core models, and then one simple linear regression model to adjust for months.
 * **Seems like we should start by making a classification model to predict whether a patient is on/off medication based on protien data.**
   * If it works well, we can include the predicted values as a feature.
-    * We should train a quick and dirty model predicting UDRS (where the medication has an impact) on rows w/o medication status. If it shows up as a prominent feature across K-Folds then we keep it. 
+    * We should train a quick and dirty model predicting UDRS (where the medication has an impact) on rows w/o medication status. If it shows up as a prominent feature across K-Folds then we keep it.
+
+## NOTES
+* Imputation (especially across a clinical visit data row) will be key. Note that protein/peptides not found in a clinical sample does NOT indicate that there is zero abundance (see discussion [here](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/discussion/396052))
+* We will only be expected to make predictions using visits with Protien/Peptide data.
+* We will be using the data from a given month (plus any previous months) to make future predictions at different month steps.
+* This means we may want to train a future looking model that is different from the same visit model since we can incorporate time series based features (change over time of a peptide for example).
+* Supplemental clinical data is really just to train month step models.
