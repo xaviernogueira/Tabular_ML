@@ -85,7 +85,7 @@ class LinearRegressionModel(MLModel):
         raise NotImplementedError
 
 
-class RidgeRegression(MLModel):
+class RidgeRegressionModel(MLModel):
 
     @staticmethod
     def train_model(

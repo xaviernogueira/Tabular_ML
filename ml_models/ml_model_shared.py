@@ -242,11 +242,6 @@ def k_fold_cv(
     return out_class
 
 
-def smape_score() -> float:
-    """Custom SMAPE score to optimize for"""
-    raise NotImplementedError
-
-
 def performance_scoring(
     model: MLModel,
     features: pd.DataFrame,
