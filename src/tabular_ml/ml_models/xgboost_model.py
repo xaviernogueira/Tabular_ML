@@ -136,7 +136,7 @@ class XGBoostRegressionModel(MLModel):
                 'eval_metric', [
                     'mae',
                     # 'rmse',
-                ]
+                ],
             ),
             'early_stopping_rounds': trial.suggest_int('early_stopping_rounds', 10, 100),
             # lambda -> L2 regularization, default was 3

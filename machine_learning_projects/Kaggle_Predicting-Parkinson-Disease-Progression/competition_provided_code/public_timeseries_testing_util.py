@@ -38,12 +38,14 @@ class MockApi:
         '''
         if self._status != 'initialized':
 
-            raise Exception('WARNING: the real API can only iterate over `iter_test()` once.')
+            raise Exception(
+                'WARNING: the real API can only iterate over `iter_test()` once.')
 
         dataframes = []
         for pth in self.input_paths:
             dataframes.append(pd.read_csv(pth, low_memory=False))
-        group_order = dataframes[0][self.group_id_column].drop_duplicates().tolist()
+        group_order = dataframes[0][self.group_id_column].drop_duplicates(
+        ).tolist()
         dataframes = [df.set_index(self.group_id_column) for df in dataframes]
 
         for group_id in group_order:
@@ -53,14 +55,17 @@ class MockApi:
                 cur_df = df.loc[group_id].copy()
                 # returning single line dataframes from df.loc requires special handling
                 if not isinstance(cur_df, pd.DataFrame):
-                    cur_df = pd.DataFrame({a: b for a, b in zip(cur_df.index.values, cur_df.values)}, index=[group_id])
+                    cur_df = pd.DataFrame({a: b for a, b in zip(
+                        cur_df.index.values, cur_df.values)}, index=[group_id])
                     cur_df = cur_df.index.rename(self.group_id_column)
-                cur_df = cur_df.reset_index(drop=not(self.export_group_id_column))
+                cur_df = cur_df.reset_index(
+                    drop=not (self.export_group_id_column))
                 current_data.append(cur_df)
             yield tuple(current_data)
 
             while self._status != 'prediction_received':
-                print('You must call `predict()` successfully before you can continue with `iter_test()`', flush=True)
+                print(
+                    'You must call `predict()` successfully before you can continue with `iter_test()`', flush=True)
                 yield None
 
         with open('submission.csv', 'w') as f_open:
@@ -72,9 +77,11 @@ class MockApi:
         Accepts and stores the user's predictions and unlocks iter_test once that is done
         '''
         if self._status == 'finished':
-            raise Exception('You have already made predictions for the full test set.')
+            raise Exception(
+                'You have already made predictions for the full test set.')
         if self._status != 'prediction_needed':
-            raise Exception('You must get the next test sample from `iter_test()` first.')
+            raise Exception(
+                'You must get the next test sample from `iter_test()` first.')
         if not isinstance(user_predictions, pd.DataFrame):
             raise Exception('You must provide a DataFrame.')
 

@@ -104,7 +104,7 @@ class CatBoostRegressionModel(MLModel):
                 'objective', [
                     'MAE',
                     # 'RMSE',
-                ]
+                ],
             ),
             'early_stopping_rounds': trial.suggest_int('early_stopping_rounds', 10, 100),
             'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
@@ -213,13 +213,14 @@ class CatBoostClassificationModel(MLModel):
             'early_stopping_rounds': trial.suggest_int('early_stopping_rounds', 10, 100),
             'depth': trial.suggest_int('depth', 2, 10),
             'bootstrap_type': trial.suggest_categorical(
-                'bootstrap_type', ['Bayesian', 'Bernoulli', 'MVS']
+                'bootstrap_type', ['Bayesian', 'Bernoulli', 'MVS'],
             ),
         }
 
         if params['bootstrap_type'] == 'Bayesian':
             params['bagging_temperature'] = trial.suggest_float(
-                'bagging_temperature', 0, 10)
+                'bagging_temperature', 0, 10,
+            )
         elif params['bootstrap_type'] == 'Bernoulli':
             params['subsample'] = trial.suggest_float('subsample', 0.1, 1)
 

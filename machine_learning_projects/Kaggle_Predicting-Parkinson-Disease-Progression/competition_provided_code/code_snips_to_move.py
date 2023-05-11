@@ -47,7 +47,7 @@ if RUN_XGB_OPTIMIZATION:
 
     # create the optuna study
     print(
-        f'Starting XGBoost optimization w/ n_trials={n_trials}, and timeout={timeout}'
+        f'Starting XGBoost optimization w/ n_trials={n_trials}, and timeout={timeout}',
     )
 
     # record time
@@ -72,7 +72,7 @@ if RUN_XGB_OPTIMIZATION:
     # record end time and key results
     end_time = datetime.now()
     print(
-        f'XGBoost Optimization complete! Took {end_time - start_time}.\n'
+        f'XGBoost Optimization complete! Took {end_time - start_time}.\n',
     )
 
     # log key stats

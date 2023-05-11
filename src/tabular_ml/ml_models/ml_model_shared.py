@@ -105,9 +105,9 @@ def k_fold_cv(
     Arguments:
         prediction_functions: a dict with model names as keys,
             and model prediction functions as values (matching args).
-        model_params: a dict with model names as keys, 
+        model_params: a dict with model names as keys,
             and parameters for that model as values.
-        metric_function: A function with the signature 
+        metric_function: A function with the signature
             f(y_true, y_preds, **kwargs) -> float. Default is R-Squared.
         metric_function_kwargs: Kwargs to pass to the metric function.
     Returns:
@@ -207,7 +207,7 @@ def k_fold_cv(
                 y_test,
                 ensemble_preds,
                 **metric_function_kwargs,
-            )
+            ),
         )
 
     # get final outputs
@@ -300,11 +300,11 @@ def find_optimal_parameters(
 
     # create the optuna study
     logging.info(
-        f'Starting {model.__name__} optimization w/ n_trials={n_trials}, and timeout={timeout}'
+        f'Starting {model.__name__} optimization w/ n_trials={n_trials}, and timeout={timeout}',
     )
 
     logging.info(
-        f'Using metric function: {metric_function.__name__}'
+        f'Using metric function: {metric_function.__name__}',
     )
     # record time
     start_time = datetime.now()
@@ -333,7 +333,7 @@ def find_optimal_parameters(
         logging.warn(
             f'Optimal direction cannot be inferred from metric_function: '
             f'{metric_function.__name__}. Please set param:direction to '
-            f'maximize or minimize. Default is minimize!'
+            f'maximize or minimize. Default is minimize!',
         )
         direction = 'minimize'
 
@@ -348,7 +348,7 @@ def find_optimal_parameters(
     # record end time and key results
     end_time = datetime.now()
     logging.info(
-        f'{metric_function.__name__} Optimization complete! Took {end_time - start_time}.\n'
+        f'{metric_function.__name__} Optimization complete! Took {end_time - start_time}.\n',
     )
 
     # log key stats

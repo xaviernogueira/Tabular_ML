@@ -6,10 +6,10 @@ To run this code, start by cloning the conda environment stored in `environment.
 
 # Contents
 ## `/ml_models`
-In order to enable experimentation, I defined  the Abstract Base Class `MLModel` in `ml_model_shared.py`, which allows all models implementing it's signature to be swapped interchangeably within K-Fold CV, model ensembles, and `optuna` hyperparameter optimization. 
+In order to enable experimentation, I defined  the Abstract Base Class `MLModel` in `ml_model_shared.py`, which allows all models implementing it's signature to be swapped interchangeably within K-Fold CV, model ensembles, and `optuna` hyperparameter optimization.
 
 Each concrete implementations of `MLModel` has the following:
-* `train_model()` - returns a trained instance of the model after being passes X, and Y `pandas.DataFrame` and `pandas.Series` respectively. 
+* `train_model()` - returns a trained instance of the model after being passes X, and Y `pandas.DataFrame` and `pandas.Series` respectively.
 * `make_predictions()` - trains a model and returns predictions on a testing X `pandas.DataFrame` as a `numpy.array`.
 * `objective()` - The name is misleading somewhat to align with `optuna` conventions. This function takes an `optuna.trial.Trial` as an argument and returns a performance score defined in `ml_model_shared.py`. The "meat" of the function defines the hyperparameter search space for a given model.
 
@@ -41,5 +41,3 @@ I implemented the following concrete implementations of `MLModel`, each stored i
 
 **Neural Network Models:**
 * `nn_model.NeuralNetworkRegressionModel` (not implemented)
-
-

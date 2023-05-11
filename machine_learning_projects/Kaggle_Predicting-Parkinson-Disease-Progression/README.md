@@ -13,7 +13,7 @@ A repo to store my attempt at the AMP Parkinson's Disease Progression Kaggle AI/
 ## Directory Organization
 Our main workflow notebooks will be stored in the parent directory and labeled by their order (i.e. 'NB1_' => notebook 1). Other sub-directories are as follows.
 
-* **`raw_inputs`-** Self explanatory. Stores training data downloaded from [Kaggle](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data). 
+* **`raw_inputs`-** Self explanatory. Stores training data downloaded from [Kaggle](https://www.kaggle.com/competitions/amp-parkinsons-disease-progression-prediction/data).
 
 * **`prepped_inputs`-** Stores model input files (i.e. a training table) after pre-processing or feature engineering.
 
