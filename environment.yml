@@ -9,8 +9,6 @@ dependencies:
   - jupyterlab
   - nodejs
   - ipympl
-  - jupyterlab-lsp
-  - python-lsp-server
 
   # data libraries
   - pandas
@@ -30,6 +28,12 @@ dependencies:
   - holoviews
   - hvplot
   - seaborn
+
+  # dev tools
+  - jupyterlab-lsp
+  - python-lsp-server
+  - pytest
+  - pre-commit
 
   # library managment
   - conda

@@ -1,5 +1,5 @@
-Tabular_MachineLearning_Projects
-=================================
+# Tabular_MachineLearning_Projects
+
 A repo to store my tabular machine learning code and pet-projects. Specific projects (such as a Kaggle competition) will be stored in their own sub-directory.
 
 To run this code, start by cloning the conda environment stored in `environment.yml`. If any of this brings value to you, do me a solid and give this repo a star!
