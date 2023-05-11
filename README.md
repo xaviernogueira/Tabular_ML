@@ -5,8 +5,11 @@ A repo to store my tabular machine learning code and pet-projects. Specific proj
 To run this code, start by cloning the conda environment stored in `environment.yml`. If any of this brings value to you, do me a solid and give this repo a star!
 
 # Contents
-## `/ml_models`
-In order to enable experimentation, I defined  the Abstract Base Class `MLModel` in `ml_model_shared.py`, which allows all models implementing it's signature to be swapped interchangeably within K-Fold CV, model ensembles, and `optuna` hyperparameter optimization.
+## `/machine_learning_projects`
+* [Kaggle_Predicting-Parkinson-Disease-Progression](https://github.com/xaviernogueira/Tabular_ML/tree/main/machine_learning_projects/Kaggle_Predicting-Parkinson-Disease-Progression)
+
+## `/tabular_ml.ml_models`
+In order to enable experimentation, I defined  the Abstract Base Class `MLModel` in `ml_model_shared.py`, which allows all models implementing it's signature to be swapped interchangeably within K-Fold CV, model ensembles, and `optuna` hyperparameter optimization. 
 
 Each concrete implementations of `MLModel` has the following:
 * `train_model()` - returns a trained instance of the model after being passes X, and Y `pandas.DataFrame` and `pandas.Series` respectively.
