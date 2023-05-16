@@ -13,10 +13,10 @@ from typing import (
     Optional,
     Any,
 )
-from ml_models.ml_model_shared import (
-    MLModel,
+from tabular_ml.functions import (
     performance_scoring,
 )
+from tabular_ml.ml_models.base import MLModel
 
 
 class CatBoostRegressionModel(MLModel):

@@ -7,14 +7,12 @@ import pandas as pd
 import sklearn.metrics
 import sklearn.model_selection
 import optuna
-import abc
 from datetime import datetime
-from optuna.trial import Trial
+from tabular_ml.ml_models.base import MLModel
 from typing import (
     Union,
     List,
     Dict,
-    Tuple,
     Optional,
     Any,
 )
@@ -22,18 +20,34 @@ from typing import (
 
 @dataclasses.dataclass
 class KFoldOutput:
-    """A class to store Regression KFold CV outputs"""
+    """A class to store Regression KFold CV outputs.
+
+    Attributes:
+        n_splits: # of K-Folds
+        random_state: random state used (can be None)
+        metric_function: name of the metric function used
+        metric_function_kwargs: kwargs passed to the metric function
+        using_training_weights: whether or not training weights were used
+        model_names: list of model names used
+        model_params: dict of model names as keys, model params as values
+        raw_model_scores: dict of model names as keys, raw scores as values
+        adj_model_scores: dict of model names as keys, adj scores as values
+        model_test_losses: dict of model names as keys, test losses as values
+        model_objects_by_fold: dict of k fold index keys, model objects as values
+        ensemble_raw_score: ensemble raw score
+        ensemble_adj_score: ensemble adj score
+        run_time: run time in seconds
+    """
     n_splits: int
     random_state: Union[int, None]
     metric_function: str
     metric_function_kwargs: Dict[str, Any]
     using_training_weights: bool
     model_names: List[str]
-    model_params: Dict[str, Dict[str, Any]]  # model names as keys
-    raw_model_scores: Dict[str, float]  # model names as keys
-    adj_model_scores: Dict[str, float]  # model names as keys
-    model_test_losses: Dict[str, List[float]]  # model names as keys
-    # k fold index as keys
+    model_params: Dict[str, Dict[str, Any]]
+    raw_model_scores: Dict[str, float]
+    adj_model_scores: Dict[str, float]
+    model_test_losses: Dict[str, List[float]]
     model_objects_by_fold = Dict[str, Dict[str, object]]
     ensemble_raw_score: float
     ensemble_adj_score: float
