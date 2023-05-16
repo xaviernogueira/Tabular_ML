@@ -3,6 +3,7 @@ Implementation of linear models for regression and classification.
 See: https://scikit-learn.org/stable/modules/classes.html#module-sklearn.linear_model
 """
 import sklearn
+from sklearn import linear_model
 import numpy as np
 import pandas as pd
 from optuna.trial import Trial
