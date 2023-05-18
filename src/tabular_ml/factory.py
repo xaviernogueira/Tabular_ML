@@ -1,4 +1,4 @@
-from tabular_ml.ml_models.base import (
+from tabular_ml.base import (
     MLModel,
     ModelTypes,
 )
@@ -46,29 +46,27 @@ class ModelFactory:
         cls.__registered_models[model.model_type][model.__name__] = model
 
     @classmethod
-    def get_all_models(cls) -> Dict[str, MLModel]:
+    def get_all_models(cls) -> List[str]:
         """Returns all registered models."""
+        return {
+            'regression': list(cls.__registered_models['regression'].keys()),
+            'classification': list(cls.__registered_models['classification'].keys()),
+        }
+
+    @classmethod
+    def get_all_models_dict(cls) -> Dict[str, MLModel]:
+        """Returns all registered models + objects as a dict."""
         return cls.__registered_models
 
     @classmethod
-    def get_regression_models_dict(cls) -> Dict[str, MLModel]:
+    def get_regression_models(cls) -> List[str]:
         """Returns all registered regression models."""
-        return cls.__registered_models['regression']
+        return list(cls.__registered_models['regression'].keys())
 
     @classmethod
-    def get_regression_model_names(cls) -> List[str]:
-        """Returns all registered regression models."""
-        return cls.__registered_models['regression'].keys()
-
-    @classmethod
-    def get_classification_models_dict(cls) -> Dict[str, MLModel]:
+    def get_classification_models(cls) -> Dict[str, MLModel]:
         """Returns all registered classification models."""
-        return cls.__registered_models['classification'].keys()
-
-    @classmethod
-    def get_classification_model_names(cls) -> List[str]:
-        """Returns all registered classification models."""
-        return cls.__registered_models['classification']
+        return list(cls.__registered_models['classification'].keys())
 
     @classmethod
     def get_regression_model(cls, model_name: str) -> MLModel:

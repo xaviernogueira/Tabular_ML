@@ -16,7 +16,7 @@ from typing import (
 from tabular_ml.functions import (
     performance_scoring,
 )
-from tabular_ml.ml_models.base import MLModel
+from tabular_ml.base import MLModel
 from tabular_ml.factory import ImplementedModel
 
 

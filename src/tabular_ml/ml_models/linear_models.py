@@ -17,7 +17,7 @@ from typing import (
 from tabular_ml.functions import (
     performance_scoring,
 )
-from tabular_ml.ml_models.base import (
+from tabular_ml.base import (
     MLModel,
     ModelTypes,
 )
@@ -184,7 +184,7 @@ class RidgeRegressionModel(MLModel):
 
 @ImplementedModel
 class LassoRegressionModel(MLModel):
-    
+
     model_type: ModelTypes = 'regression'
 
     @staticmethod

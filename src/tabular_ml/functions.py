@@ -8,7 +8,7 @@ import sklearn.metrics
 import sklearn.model_selection
 import optuna
 from datetime import datetime
-from tabular_ml.ml_models.base import MLModel
+from tabular_ml.base import MLModel
 from typing import (
     Union,
     List,

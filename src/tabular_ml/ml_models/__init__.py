@@ -1,4 +1,3 @@
-from tabular_ml.ml_models.base import MLModel
 from tabular_ml.ml_models.catboost_model import (
     CatBoostRegressionModel,
     CatBoostClassificationModel,
