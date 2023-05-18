@@ -3,12 +3,9 @@ repos:
     rev: v4.4.0
     hooks:
       - id: trailing-whitespace
-        exclude: machine_learning_projects
       - id: check-ast
-        exclude: machine_learning_projects
       - id: check-case-conflict
       - id: debug-statements
-        exclude: machine_learning_projects
       - id: end-of-file-fixer
       - id: check-docstring-first
       - id: check-added-large-files
@@ -17,7 +14,6 @@ repos:
     rev: v2.0.2
     hooks:
       - id: autopep8
-        exclude: machine_learning_projects
 
   - repo: https://github.com/asottile/add-trailing-comma
     rev: v2.4.0
