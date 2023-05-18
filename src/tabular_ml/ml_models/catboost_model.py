@@ -43,8 +43,6 @@ class CatBoostRegressionModel(MLModel):
             cat_features=categorical_features,
         )
 
-        # TODO: enable custom eval function!
-
         # return the trained model
         catboost_model = catboost.CatBoostRegressor(**model_params)
         return catboost_model.fit(
