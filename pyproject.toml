@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=61", "wheel", "setuptools_scm[toml]>=3.4"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tabular_ml"
+dynamic = ["version", "readme"]
+
+description = "This library wraps popular tabular regression/classification model enabling rapid evaluation and optimization."
+authors = [
+    {name = "Xavier Nogueira", email = "xavier.rojas.nogueira@gmail.com"},
+]
+
+requires-python = ">=3.11"
+keywords = [
+    'machine-learning',
+    'pipeline',
+    'factory',
+    'tabular',
+    'regression',
+    'classification',
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+]
+
+dependencies = [
+    'pandas',
+    'numpy',
+    'scipy',
+    'scikit-learn',
+    'optuna',
+    'xgboost',
+    'catboost',
+    'lightgbm',
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["tabular_ml*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "tabular_ml.__version__"}
+readme = {file = "README.md"}
