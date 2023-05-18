@@ -1,4 +1,6 @@
 [![Pre-Commit Status](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/pre-commit.yml)
+[![Tests Status](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/tests.yml/badge.svg)](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/tests.yml)
+
 # Tabular_ML
 
 A repo to store my tabular machine learning code and pet-projects. Specific projects (such as a Kaggle competition) will be stored in their own sub-directory.
