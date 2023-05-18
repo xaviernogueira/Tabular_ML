@@ -19,7 +19,8 @@ def test_regression_models() -> None:
     assert len(regression_models) > 0
     assert isinstance(regression_models[0], str)
     first_model_obj = tabular_ml.ModelFactory.get_regression_model(
-        regression_models[0])
+        regression_models[0],
+    )
     assert issubclass(first_model_obj, tabular_ml.base.MLModel)
 
 
