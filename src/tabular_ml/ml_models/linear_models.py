@@ -17,10 +17,17 @@ from typing import (
 from tabular_ml.functions import (
     performance_scoring,
 )
-from tabular_ml.ml_models.base import MLModel
+from tabular_ml.ml_models.base import (
+    MLModel,
+    ModelTypes,
+)
+from tabular_ml.factory import ImplementedModel
 
 
+@ImplementedModel
 class LinearRegressionModel(MLModel):
+
+    model_type: ModelTypes = 'regression'
 
     @staticmethod
     def train_model(
@@ -54,7 +61,7 @@ class LinearRegressionModel(MLModel):
         weights_train: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
     ) -> Tuple[sklearn.linear_model.LinearRegression, np.ndarray]:
-        # ordinally encode categorical features?
+        # ordinarily encode categorical features?
 
         # train model
         model = LinearRegressionModel.train_model(
@@ -86,7 +93,10 @@ class LinearRegressionModel(MLModel):
         raise NotImplementedError
 
 
+@ImplementedModel
 class RidgeRegressionModel(MLModel):
+
+    model_type: ModelTypes = 'regression'
 
     @staticmethod
     def train_model(
@@ -124,7 +134,7 @@ class RidgeRegressionModel(MLModel):
         # one-hot-encode encode test categorical features
 
         # train model
-        model = RidgeRegression.train_model(
+        model = RidgeRegressionModel.train_model(
             x_train,
             y_train,
             model_params,
@@ -160,7 +170,7 @@ class RidgeRegressionModel(MLModel):
         }
 
         return performance_scoring(
-            model_class=RidgeRegression,
+            model_class=RidgeRegressionModel,
             features=features,
             target=target,
             kfolds=kfolds,
@@ -172,7 +182,10 @@ class RidgeRegressionModel(MLModel):
         )
 
 
+@ImplementedModel
 class LassoRegressionModel(MLModel):
+    
+    model_type: ModelTypes = 'regression'
 
     @staticmethod
     def train_model(
@@ -254,7 +267,10 @@ class LassoRegressionModel(MLModel):
         )
 
 
+@ImplementedModel
 class ElasticNetRegressionModel(MLModel):
+
+    model_type: ModelTypes = 'regression'
 
     @staticmethod
     def train_model(
@@ -337,7 +353,10 @@ class ElasticNetRegressionModel(MLModel):
         )
 
 
+@ImplementedModel
 class BayesianRidgeRegressionModel(MLModel):
+
+    model_type: ModelTypes = 'regression'
 
     @staticmethod
     def train_model(

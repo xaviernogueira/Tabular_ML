@@ -9,11 +9,16 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Literal,
 )
+
+ModelTypes = Literal['classification', 'regression']
 
 
 class MLModel(abc.ABC):
     """Signature for a ML model"""
+
+    model_type: ModelTypes
 
     @abc.abstractclassmethod
     def train_model(

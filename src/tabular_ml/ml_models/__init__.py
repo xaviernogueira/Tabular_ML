@@ -1,5 +1,20 @@
 from tabular_ml.ml_models.base import MLModel
-import tabular_ml.ml_models.catboost_model as catboost_model
-import tabular_ml.ml_models.xgboost_model as xgboost_model
-import tabular_ml.ml_models.lgbm_model as lgbm_model
-import tabular_ml.ml_models.linear_models as linear_models
+from tabular_ml.ml_models.catboost_model import (
+    CatBoostRegressionModel,
+    CatBoostClassificationModel,
+)
+from tabular_ml.ml_models.xgboost_model import (
+    XGBoostRegressionModel,
+)
+from tabular_ml.ml_models.lgbm_model import (
+    LightGBMRegressionModel,
+)
+from tabular_ml.ml_models.linear_models import (
+    LinearRegressionModel,
+    RidgeRegressionModel,
+    LassoRegressionModel,
+    ElasticNetRegressionModel,
+    BayesianRidgeRegressionModel,
+
+
+)

@@ -16,10 +16,17 @@ from typing import (
 from tabular_ml.functions import (
     performance_scoring,
 )
-from tabular_ml.ml_models.base import MLModel
+from tabular_ml.ml_models.base import (
+    MLModel,
+    ModelTypes,
+)
+from tabular_ml.factory import ImplementedModel
 
 
+@ImplementedModel
 class XGBoostRegressionModel(MLModel):
+
+    model_type: ModelTypes = 'regression'
 
     @staticmethod
     def train_model(

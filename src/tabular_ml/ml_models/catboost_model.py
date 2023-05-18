@@ -17,9 +17,13 @@ from tabular_ml.functions import (
     performance_scoring,
 )
 from tabular_ml.ml_models.base import MLModel
+from tabular_ml.factory import ImplementedModel
 
 
+@ImplementedModel
 class CatBoostRegressionModel(MLModel):
+
+    model_type = 'regression'
 
     @staticmethod
     def train_model(
@@ -127,7 +131,10 @@ class CatBoostRegressionModel(MLModel):
         )
 
 
+@ImplementedModel
 class CatBoostClassificationModel(MLModel):
+
+    model_type = 'classification'
 
     @staticmethod
     def train_model(
