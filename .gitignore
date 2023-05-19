@@ -1,2 +1,3 @@
 src/tabular_ml/__pycache__/**
 *.pyc
+tests/us_counties_metrics.parquet
