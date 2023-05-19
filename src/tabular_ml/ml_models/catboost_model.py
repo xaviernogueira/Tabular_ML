@@ -56,6 +56,19 @@ class CatBoostRegressionModel(MLModel):
 
     @staticmethod
     def make_predictions(
+        trained_model: catboost.CatBoostRegressor,
+        x_test: pd.DataFrame,
+        categorical_features: Optional[List[str]] = None,
+    ) -> np.ndarray:
+        # load in testing data
+        test_data_pool = catboost.Pool(
+            data=x_test,
+            cat_features=categorical_features,
+        )
+        return trained_model.predict(test_data_pool)
+
+    @staticmethod
+    def train_and_predict(
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -64,11 +77,6 @@ class CatBoostRegressionModel(MLModel):
         categorical_features: Optional[List[str]] = None,
     ) -> Tuple[catboost.CatBoostRegressor, np.ndarray]:
         """Trains a CatBoost model and makes predictions"""
-        # load in testing data
-        test_data_pool = catboost.Pool(
-            data=x_test,
-            cat_features=categorical_features,
-        )
 
         # train a model
         catboost_model = CatBoostRegressionModel.train_model(
@@ -82,7 +90,11 @@ class CatBoostRegressionModel(MLModel):
         # return predictions array
         return (
             catboost_model,
-            catboost_model.predict(test_data_pool),
+            CatBoostRegressionModel.make_predictions(
+                trained_model=catboost_model,
+                x_test=x_test,
+                categorical_feature=categorical_features,
+            ),
         )
 
     @staticmethod
@@ -167,6 +179,20 @@ class CatBoostClassificationModel(MLModel):
 
     @staticmethod
     def make_predictions(
+        trained_model: catboost.CatBoostClassifier,
+        x_test: pd.DataFrame,
+        categorical_features: Optional[List[str]] = None,
+    ) -> np.ndarray:
+        # load in testing data
+        test_data_pool = catboost.Pool(
+            data=x_test,
+            cat_features=categorical_features,
+        )
+        class_idx = list(trained_model.classes_).index(1)
+        return trained_model.predict_proba(test_data_pool)[:, class_idx]
+
+    @staticmethod
+    def train_and_predict(
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -175,11 +201,6 @@ class CatBoostClassificationModel(MLModel):
         categorical_features: Optional[List[str]] = None,
     ) -> Tuple[catboost.CatBoostClassifier, np.ndarray]:
         """Trains a XGBoost model and makes predictions"""
-        # load in testing data
-        test_data_pool = catboost.Pool(
-            data=x_test,
-            cat_features=categorical_features,
-        )
 
         # train a model
         catboost_model = CatBoostClassificationModel.train_model(
@@ -193,7 +214,11 @@ class CatBoostClassificationModel(MLModel):
         # return predictions array
         return (
             catboost_model,
-            catboost_model.predict(test_data_pool)[:, 1],
+            CatBoostClassificationModel.make_predictions(
+                trained_model=catboost_model,
+                x_test=x_test,
+                categorical_feature=categorical_features,
+            ),
         )
 
     @staticmethod

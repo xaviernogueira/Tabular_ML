@@ -66,7 +66,8 @@ class XGBoostRegressionModel(MLModel):
         if 'num_boost_round' in model_params.keys():
             num_boost_round = model_params.pop('num_boost_round')
         else:
-            num_boost_round = None
+            # XGBoost requires an int, this is the libraries default
+            num_boost_round = 10
         if 'verbose_eval' in model_params.keys():
             if isinstance(model_params['verbose_eval'], bool):
                 verbose_eval = model_params.pop('verbose_eval')
@@ -85,14 +86,10 @@ class XGBoostRegressionModel(MLModel):
 
     @staticmethod
     def make_predictions(
-        x_train: pd.DataFrame,
-        y_train: pd.Series,
+        trained_model: xgboost.Booster,
         x_test: pd.DataFrame,
-        model_params: Dict[str, Any],
-        weights_train: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-    ) -> Tuple[xgboost.Booster, np.ndarray]:
-
+    ) -> np.ndarray:
         # deal with testing categorical features
         if categorical_features is not None:
             for cat_feat in categorical_features:
@@ -104,6 +101,18 @@ class XGBoostRegressionModel(MLModel):
             nthread=-1,  # max multithreading
             enable_categorical=bool(categorical_features),
         )
+
+        return trained_model.predict(test_data_matrix)
+
+    @staticmethod
+    def train_and_predict(
+        x_train: pd.DataFrame,
+        y_train: pd.Series,
+        x_test: pd.DataFrame,
+        model_params: Dict[str, Any],
+        weights_train: Optional[pd.Series] = None,
+        categorical_features: Optional[List[str]] = None,
+    ) -> Tuple[xgboost.Booster, np.ndarray]:
 
         # TODO: enable custom eval function!
 
@@ -119,7 +128,11 @@ class XGBoostRegressionModel(MLModel):
         # return prediction array
         return (
             xgb_model,
-            xgb_model.predict(test_data_matrix),
+            XGBoostRegressionModel.make_predictions(
+                trained_model=xgb_model,
+                x_test=x_test,
+                categorical_features=categorical_features,
+            ),
         )
 
     @staticmethod

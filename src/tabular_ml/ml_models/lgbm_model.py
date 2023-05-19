@@ -60,20 +60,41 @@ class LightGBMRegressionModel(MLModel):
         if 'num_boost_round' in model_params.keys():
             num_boost_round = model_params.pop('num_boost_round')
         else:
-            num_boost_round = None
+            # TODO: see if we can do dictionary kwargs instead, for now leave as default
+            num_boost_round = 100
 
         # return the trained model
         # TODO: get this in place correct!
         return lightgbm.train(
             params=model_params,
             train_set=train_data_ds,
-            evals=evals,
+            # TODO: get evals working evals=evals,
             early_stopping_rounds=early_stopping_rounds,
             num_boost_round=num_boost_round,
         )
 
     @staticmethod
     def make_predictions(
+        trained_model: lightgbm.Booster,
+        x_test: pd.DataFrame,
+        categorical_features: Optional[List[str]] = None,
+    ) -> np.ndarray:
+        """Makes predictions with LightGBM"""
+
+        # TODO: figure out why this doesn't work
+        # load in testing data in a library optimized way
+        # test_data_ds = lightgbm.Dataset(
+        #    data=x_test,
+        #    categorical_feature=categorical_features,
+        # )
+
+        return trained_model.predict(
+            x_test,
+            categorical_features=categorical_features,
+        )
+
+    @staticmethod
+    def train_and_predict(
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -82,13 +103,7 @@ class LightGBMRegressionModel(MLModel):
         categorical_features: Optional[List[str]] = None,
     ) -> Tuple[lightgbm.Booster, np.ndarray]:
 
-        # load in testing data
-        test_data_ds = lightgbm.Dataset(
-            data=x_test,
-            categorical_feature=categorical_features,
-        )
-
-        # train the model
+        # get trained model
         lgbm_model = LightGBMRegressionModel.train_model(
             x_train,
             y_train,
@@ -100,7 +115,11 @@ class LightGBMRegressionModel(MLModel):
         # return prediction array
         return (
             lgbm_model,
-            lgbm_model.predict(test_data_ds),
+            LightGBMRegressionModel.make_predictions(
+                trained_model=lgbm_model,
+                x_test=x_test,
+                categorical_features=categorical_features,
+            ),
         )
 
     @staticmethod

@@ -2,6 +2,7 @@
 Implementation of linear models for regression and classification.
 See: https://scikit-learn.org/stable/modules/classes.html#module-sklearn.linear_model
 """
+import warnings
 import sklearn
 from sklearn import linear_model
 import numpy as np
@@ -54,6 +55,14 @@ class LinearRegressionModel(MLModel):
 
     @staticmethod
     def make_predictions(
+        trained_model: sklearn.linear_model.LinearRegression,
+        x_test: pd.DataFrame,
+        categorical_features: Optional[List[str]] = None,
+    ) -> np.ndarray:
+        return trained_model.predict(x_test)
+
+    @staticmethod
+    def train_and_predict(
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -74,7 +83,10 @@ class LinearRegressionModel(MLModel):
 
         return (
             model,
-            model.predict(x_test),
+            LassoRegressionModel.make_predictions(
+                trained_model=model,
+                x_test=x_test,
+            ),
         )
 
     @staticmethod
@@ -124,6 +136,14 @@ class RidgeRegressionModel(MLModel):
 
     @staticmethod
     def make_predictions(
+        trained_model: sklearn.linear_model.Ridge,
+        x_test: pd.DataFrame,
+        categorical_features: Optional[List[str]] = None,
+    ) -> np.ndarray:
+        return trained_model.predict(x_test)
+
+    @staticmethod
+    def train_and_predict(
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -144,7 +164,10 @@ class RidgeRegressionModel(MLModel):
 
         return (
             model,
-            model.predict(x_test),
+            RidgeRegressionModel.make_predictions(
+                trained_model=model,
+                x_test=x_test,
+            ),
         )
 
     @staticmethod
@@ -213,6 +236,14 @@ class LassoRegressionModel(MLModel):
 
     @staticmethod
     def make_predictions(
+        trained_model: sklearn.linear_model.Lasso,
+        x_test: pd.DataFrame,
+        categorical_features: Optional[List[str]] = None,
+    ) -> np.ndarray:
+        return trained_model.predict(x_test)
+
+    @staticmethod
+    def train_and_predict(
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -233,7 +264,10 @@ class LassoRegressionModel(MLModel):
 
         return (
             model,
-            model.predict(x_test),
+            LassoRegressionModel.make_predictions(
+                trained_model=model,
+                x_test=x_test,
+            ),
         )
 
     @staticmethod
@@ -298,6 +332,16 @@ class ElasticNetRegressionModel(MLModel):
 
     @staticmethod
     def make_predictions(
+        trained_model: sklearn.linear_model.ElasticNet,
+        x_test: pd.DataFrame,
+        categorical_features: Optional[List[str]] = None,
+    ) -> np.ndarray:
+        # TODO: consider adding a shared warning to check that the expected model
+        # instance type is passed thru
+        return trained_model.predict(x_test)
+
+    @staticmethod
+    def train_and_predict(
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -318,7 +362,10 @@ class ElasticNetRegressionModel(MLModel):
 
         return (
             model,
-            model.predict(x_test),
+            ElasticNetRegressionModel.make_predictions(
+                trained_model=model,
+                x_test=x_test,
+            ),
         )
 
     @staticmethod
@@ -384,6 +431,14 @@ class BayesianRidgeRegressionModel(MLModel):
 
     @staticmethod
     def make_predictions(
+        trained_model: sklearn.linear_model.BayesianRidge,
+        x_test: pd.DataFrame,
+        categorical_features: Optional[List[str]] = None,
+    ) -> np.ndarray:
+        return trained_model.predict(x_test)
+
+    @staticmethod
+    def train_and_predict(
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -404,7 +459,10 @@ class BayesianRidgeRegressionModel(MLModel):
 
         return (
             model,
-            model.predict(x_test),
+            BayesianRidgeRegressionModel.make_predictions(
+                trained_model=model,
+                x_test=x_test,
+            ),
         )
 
     @staticmethod

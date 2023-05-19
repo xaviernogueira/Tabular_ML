@@ -30,8 +30,16 @@ class MLModel(abc.ABC):
     ) -> object:
         raise NotImplementedError
 
-    @abc.abstractclassmethod
+    @abc.abstractstaticmethod
     def make_predictions(
+        trained_model: object,
+        x_test: pd.DataFrame,
+        categorical_features: Optional[List[str]] = None,
+    ) -> np.ndarray:
+        raise NotImplementedError
+
+    @abc.abstractclassmethod
+    def train_and_predict(
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,

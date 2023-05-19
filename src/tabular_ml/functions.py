@@ -155,7 +155,7 @@ def k_fold_cv(
             logging.info(f'Split {i} | {model_name} - {datetime.now()}')
             params = model_params[model_name].copy()
 
-            model_objects[model_name], model_predictions[model_name] = model_class.make_predictions(
+            model_objects[model_name], model_predictions[model_name] = model_class.train_and_predict(
                 x_train,
                 y_train,
                 x_test,
