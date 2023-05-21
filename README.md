@@ -1,16 +1,22 @@
 [![Pre-Commit Status](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/pre-commit.yml)
 [![Tests Status](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/tests.yml/badge.svg)](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/tests.yml)
 
-# Tabular_ML
+# `tabular_ml` Documentation
+I've open sourced my personal machine learning tools to speed up your next data science project!
 
-A repo to store my tabular machine learning code and pet-projects. Specific projects (such as a Kaggle competition) will be stored in their own sub-directory.
+Train, evaluate, ensemble, and optimize hyperparameters from a standardized interface.
 
-To run this code, start by cloning the conda environment stored in `environment.yml`. If any of this brings value to you, do me a solid and give this repo a star!
+![repo_schematic](images/readme_image.png)
 
-# Contents
-## `/machine_learning_projects`
-* [Kaggle_Predicting-Parkinson-Disease-Progression](https://github.com/xaviernogueira/Tabular_ML/tree/main/machine_learning_projects/Kaggle_Predicting-Parkinson-Disease-Progression)
+## Overview
 
+## Currently supported models
+
+## Evaluate 
+
+## Optimize hyperparameters
+
+## Contribute
 ## `/tabular_ml.ml_models`
 In order to enable experimentation, I defined  the Abstract Base Class `MLModel` in `ml_model_shared.py`, which allows all models implementing it's signature to be swapped interchangeably within K-Fold CV, model ensembles, and `optuna` hyperparameter optimization.
 
