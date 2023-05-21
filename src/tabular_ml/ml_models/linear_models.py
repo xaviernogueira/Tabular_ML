@@ -106,7 +106,7 @@ class LinearRegressionModel(MLModel):
     ) -> float:
 
         warnings.warn(
-            'There are no hyperparameters to tune for LinearRegression.'
+            'There are no hyperparameters to tune for LinearRegression.',
         )
         raise NotImplementedError
 

@@ -7,7 +7,7 @@ from sklearn import datasets
 import tabular_ml
 
 print(
-    f'Testing the following models {tabular_ml.ModelFactory.get_all_models()}'
+    f'Testing the following models {tabular_ml.ModelFactory.get_all_models()}',
 )
 
 
