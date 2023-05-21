@@ -1,16 +1,14 @@
-"""Test using the MLModel implementation on sklearn toy data.
-"""
+"""Test using the MLModel implementation on sklearn toy data."""
 import typing
-import pytest
 import numpy as np
 import pandas as pd
 import sklearn
+from sklearn import datasets
 import tabular_ml
-from pathlib import Path
 
-print(tabular_ml.ModelFactory.get_all_models())
-
-# TODO: update to sklearn toy datasets later
+print(
+    f'Testing the following models {tabular_ml.ModelFactory.get_all_models()}'
+)
 
 
 def model_test(
@@ -48,17 +46,13 @@ def test_regression_models() -> None:
     """Tests all regression models."""
     regression_models = tabular_ml.ModelFactory.get_regression_models()
 
-    # get test data
-    if Path.cwd().name == 'tests':
-        test_data_path = Path.cwd() / 'us_counties_metrics.parquet'
-    else:
-        test_data_path = Path.cwd() / 'tests/us_counties_metrics.parquet'
-    data = pd.read_parquet(
-        test_data_path,
-    ).fillna(0).iloc[:100]
+    # get test regression data
+    data = sklearn.datasets.load_diabetes(
+        as_frame=True,
+    ).frame.fillna(0).iloc[:100]
 
     train, test = sklearn.model_selection.train_test_split(data)
-    pred_col = 'gdp_growth_rate%_2001to2019'
+    pred_col = 'target'
 
     # test each regression model implementation
     for model_name in regression_models:
@@ -75,20 +69,13 @@ def test_regression_models() -> None:
 def test_classification_models() -> None:
     classification_models = tabular_ml.ModelFactory.get_classification_models()
 
-    # get test data
-    if Path.cwd().name == 'tests':
-        test_data_path = Path.cwd() / 'us_counties_metrics.parquet'
-    else:
-        test_data_path = Path.cwd() / 'tests/us_counties_metrics.parquet'
-    data = pd.read_parquet(
-        test_data_path,
-    ).fillna(0).iloc[:100]
-
-    # make a categorical column
-    data['pred_col'] = np.round(data.gini_index.values, 0).astype(int)
+    # get test classification data
+    data = sklearn.datasets.load_iris(
+        as_frame=True,
+    ).frame.fillna(0).iloc[:100]
 
     train, test = sklearn.model_selection.train_test_split(data)
-    pred_col = 'pred_col'
+    pred_col = 'target'
 
     # test each regression model implementation
     for model_name in classification_models:
