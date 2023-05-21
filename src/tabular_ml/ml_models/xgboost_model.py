@@ -19,6 +19,8 @@ from tabular_ml.functions import (
 from tabular_ml.base import (
     MLModel,
     ModelTypes,
+    OptunaRangeDict,
+    get_optuna_ranges,
 )
 from tabular_ml.factory import ImplementedModel
 
@@ -27,6 +29,15 @@ from tabular_ml.factory import ImplementedModel
 class XGBoostRegressionModel(MLModel):
 
     model_type: ModelTypes = 'regression'
+    optuna_param_ranges: OptunaRangeDict = {
+        'eval_metric': ['mae'],
+        'early_stopping_rounds': (10, 100),
+        'lambda': (3, 8),
+        'learning_rate': (0.01, 0.4),
+        'max_depth': (2, 8),
+        'colsample_bytree': (0.5, 1.0),
+        'num_boost_round': (250, 1500),
+    }
 
     @staticmethod
     def train_model(
@@ -145,26 +156,55 @@ class XGBoostRegressionModel(MLModel):
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
         random_state: Optional[int] = None,
+        custom_optuna_ranges: Optional[OptunaRangeDict] = None,
     ) -> float:
         """
         XGBoost parameter search space for optuna.
         """
 
-        # fill in more via https://catboost.ai/en/docs/references/training-parameters/common#bootstrap_type
+        # get parameter ranges
+        param_ranges = get_optuna_ranges(
+            XGBoostRegressionModel.optuna_param_ranges,
+            custom_optuna_ranges=custom_optuna_ranges,
+        )
+
+        # set up parameters
         params = {
             'eval_metric': trial.suggest_categorical(
-                'eval_metric', [
-                    'mae',
-                    # 'rmse',
-                ],
+                'eval_metric',
+                param_ranges['eval_metric'],
             ),
-            'early_stopping_rounds': trial.suggest_int('early_stopping_rounds', 10, 100),
+            'early_stopping_rounds': trial.suggest_int(
+                'early_stopping_rounds',
+                param_ranges['early_stopping_rounds'][0],
+                param_ranges['early_stopping_rounds'][-1],
+            ),
             # lambda -> L2 regularization, default was 3
-            'lambda': trial.suggest_int('lambda', 3, 8),
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.4),
-            'max_depth': trial.suggest_int('max_depth', 2, 8),
-            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 1.0),
-            'num_boost_round': trial.suggest_int('num_boost_round', 250, 1500),
+            'lambda': trial.suggest_int(
+                'lambda',
+                param_ranges['lambda'][0],
+                param_ranges['lambda'][-1],
+            ),
+            'learning_rate': trial.suggest_float(
+                'learning_rate',
+                param_ranges['learning_rate'][0],
+                param_ranges['learning_rate'][-1],
+            ),
+            'max_depth': trial.suggest_int(
+                'max_depth',
+                param_ranges['max_depth'][0],
+                param_ranges['max_depth'][-1],
+            ),
+            'colsample_bytree': trial.suggest_float(
+                'colsample_bytree',
+                param_ranges['colsample_bytree'][0],
+                param_ranges['colsample_bytree'][-1],
+            ),
+            'num_boost_round': trial.suggest_int(
+                'num_boost_round',
+                param_ranges['num_boost_round'][0],
+                param_ranges['num_boost_round'][-1],
+            ),
         }
 
         logging.info(f'\n----------------------\n{params}')
