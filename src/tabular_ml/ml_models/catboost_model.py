@@ -2,6 +2,7 @@
 CatBoost regression.
 """
 import catboost
+import warnings
 import logging
 import pandas as pd
 import numpy as np
@@ -16,14 +17,27 @@ from typing import (
 from tabular_ml.functions import (
     performance_scoring,
 )
-from tabular_ml.base import MLModel
+from tabular_ml.base import (
+    MLModel,
+    ModelTypes,
+    OptunaRangeDict,
+)
 from tabular_ml.factory import ImplementedModel
 
 
 @ImplementedModel
 class CatBoostRegressionModel(MLModel):
 
-    model_type = 'regression'
+    model_type: ModelTypes = 'regression'
+    optuna_param_ranges: OptunaRangeDict = {
+        'objective': ['MAE', 'RMSE'],
+        'learning_rate': (0.01, 0.3),
+        'early_stopping_rounds': (10, 100),
+        'depth': (2, 10),
+        'colsample_bylevel': (0.01, 0.1),
+        'l2_leaf_reg': (3, 8),
+        'iterations': (500, 2000),
+    }
 
     @staticmethod
     def train_model(
@@ -107,25 +121,52 @@ class CatBoostRegressionModel(MLModel):
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
         random_state: Optional[int] = None,
+        custom_optuna_ranges: Optional[OptunaRangeDict] = None,
     ) -> float:
         """
         CatBoost parameter search space for optuna.
         """
+        # get parameter ranges
+        param_ranges = CatBoostRegressionModel.get_optuna_ranges(
+            custom_optuna_ranges=custom_optuna_ranges,
+        )
 
         # fill in more via https://catboost.ai/en/docs/references/training-parameters/common#bootstrap_type
         params = {
             'objective': trial.suggest_categorical(
-                'objective', [
-                    'MAE',
-                    # 'RMSE',
-                ],
+                'objective',
+                param_ranges['objective'],
             ),
-            'early_stopping_rounds': trial.suggest_int('early_stopping_rounds', 10, 100),
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
-            'l2_leaf_reg': trial.suggest_int('l2_leaf_reg', 3, 8),
-            'depth': trial.suggest_int('depth', 2, 8),
-            'colsample_bylevel': trial.suggest_float('colsample_bylevel', 0.01, 0.4),
-            'iterations': trial.suggest_int('iterations', 500, 2000),
+            'learning_rate': trial.suggest_float(
+                'learning_rate',
+                param_ranges['learning_rate'][0],
+                param_ranges['learning_rate'][-1],
+            ),
+            'early_stopping_rounds': trial.suggest_int(
+                'early_stopping_rounds',
+                param_ranges['early_stopping_rounds'][0],
+                param_ranges['early_stopping_rounds'][-1],
+            ),
+            'depth': trial.suggest_int(
+                'depth',
+                param_ranges['depth'][0],
+                param_ranges['depth'][-1],
+            ),
+            'colsample_bylevel': trial.suggest_float(
+                'colsample_bylevel',
+                param_ranges['colsample_bylevel'][0],
+                param_ranges['colsample_bylevel'][-1],
+            ),
+            'l2_leaf_reg': trial.suggest_float(
+                'l2_leaf_reg',
+                param_ranges['l2_leaf_reg'][0],
+                param_ranges['l2_leaf_reg'][-1],
+            ),
+            'iterations': trial.suggest_int(
+                'iterations',
+                param_ranges['iterations'][0],
+                param_ranges['iterations'][-1],
+            ),
         }
 
         logging.info(f'\n----------------------\n{params}')
@@ -146,7 +187,16 @@ class CatBoostRegressionModel(MLModel):
 @ImplementedModel
 class CatBoostClassificationModel(MLModel):
 
-    model_type = 'classification'
+    model_type: ModelTypes = 'classification'
+    optuna_param_ranges: OptunaRangeDict = {
+        'learning_rate': (0.01, 0.3),
+        'early_stopping_rounds': (10, 100),
+        'depth': (2, 10),
+        'bootstrap_type': ['Bayesian', 'Bernoulli', 'MVS'],
+        'colsample_bylevel': (0.01, 0.1),
+        'bagging_temperature': (0, 10),
+        'subsample': (0.1, 1),
+    }
 
     @staticmethod
     def train_model(
@@ -231,28 +281,59 @@ class CatBoostClassificationModel(MLModel):
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
         random_state: Optional[int] = None,
+        custom_optuna_ranges: Optional[OptunaRangeDict] = None,
     ) -> float:
         """
         CatBoost parameter search space for optuna.
         """
+        # get parameter ranges
+        param_ranges = CatBoostClassificationModel.get_optuna_ranges(
+            custom_optuna_ranges=custom_optuna_ranges,
+        )
 
-        # fill in more via https://catboost.ai/en/docs/references/training-parameters/common#bootstrap_type
+        # TODO: support more parameters
+        # https://catboost.ai/en/docs/references/training-parameters/common#bootstrap_type
         params = {
-            # "colsample_bylevel": trial.suggest_float("colsample_bylevel", 0.01, 0.1), does not work on GPU
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.03),
-            'early_stopping_rounds': trial.suggest_int('early_stopping_rounds', 10, 100),
-            'depth': trial.suggest_int('depth', 2, 10),
+            'learning_rate': trial.suggest_float(
+                'learning_rate',
+                param_ranges['learning_rate'][0],
+                param_ranges['learning_rate'][-1],
+            ),
+            'early_stopping_rounds': trial.suggest_int(
+                'early_stopping_rounds',
+                param_ranges['early_stopping_rounds'][0],
+                param_ranges['early_stopping_rounds'][-1],
+            ),
+            'depth': trial.suggest_int(
+                'depth',
+                param_ranges['depth'][0],
+                param_ranges['depth'][-1],
+            ),
             'bootstrap_type': trial.suggest_categorical(
-                'bootstrap_type', ['Bayesian', 'Bernoulli', 'MVS'],
+                'bootstrap_type',
+                param_ranges['bootstrap_type'],
             ),
         }
 
+        if 'task_type' in params.keys():
+            if not params['task_type'] == 'GPU':
+                params['colsample_bylevel'] = trial.suggest_float(
+                    'colsample_bylevel',
+                    param_ranges['colsample_bylevel'][0],
+                    param_ranges['colsample_bylevel'][-1],
+                )
         if params['bootstrap_type'] == 'Bayesian':
             params['bagging_temperature'] = trial.suggest_float(
-                'bagging_temperature', 0, 10,
+                'bagging_temperature',
+                param_ranges['bagging_temperature'][0],
+                param_ranges['bagging_temperature'][-1],
             )
         elif params['bootstrap_type'] == 'Bernoulli':
-            params['subsample'] = trial.suggest_float('subsample', 0.1, 1)
+            params['subsample'] = trial.suggest_float(
+                'subsample',
+                param_ranges['bagging_temperature'][0],
+                param_ranges['bagging_temperature'][-1],
+            )
 
         logging.info(f'\n----------------------\n{params}')
 
