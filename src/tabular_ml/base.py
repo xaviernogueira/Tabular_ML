@@ -21,7 +21,7 @@ class MLModel(abc.ABC):
     """Signature for a ML model"""
 
     model_type: ModelTypes
-    optuna_param_ranges: OptunaRangeDict
+    optuna_param_ranges: OptunaRangeDict | None
 
     @abc.abstractclassmethod
     def train_model(
@@ -66,31 +66,40 @@ class MLModel(abc.ABC):
     ) -> float:
         raise NotImplementedError
 
-    @classmethod
-    def get_optuna_ranges(
-        cls,
-        custom_optuna_ranges: Optional[OptunaRangeDict] = None,
-    ) -> OptunaRangeDict:
-        """Get the optuna ranges for the model (and/or updates them)"""
 
-        # return base ranges if no custom ranges
-        if not custom_optuna_ranges:
-            return cls.optuna_param_ranges
+def get_optuna_ranges(
+    default_optuna_ranges: OptunaRangeDict,
+    custom_optuna_ranges: Optional[OptunaRangeDict] = None,
+) -> OptunaRangeDict:
+    """Get the optuna ranges for the model (and/or updates them).
 
-        # update the base ranges with the custom ranges if desired
-        new_optuna_ranges = cls.optuna_param_ranges.copy()
-        for key, value in custom_optuna_ranges.items():
-            if key not in new_optuna_ranges:
-                warnings.warn(
-                    f'{key} is not a supported parameter! Skipping.',
-                )
-                continue
-            if isinstance(value, type(new_optuna_ranges[key])):
-                new_optuna_ranges[key] = value
+    NOTE: This should be called at the top of the objective function.
 
-            else:
-                warnings.warn(
-                    f'Custom optuna range for {key} is not the correct type='
-                    f'{type(new_optuna_ranges[key])}. Using default range instead.',
-                )
-        return new_optuna_ranges
+    Arguments:
+        default_optuna_ranges: The default optuna ranges for the model.
+        custom_optuna_ranges: The custom optuna ranges for the model.
+    Return:
+        The optuna ranges for the model optimization.
+    """
+
+    # return base ranges if no custom ranges
+    if not custom_optuna_ranges:
+        return default_optuna_ranges
+
+    # update the base ranges with the custom ranges if desired
+    new_optuna_ranges = default_optuna_ranges.copy()
+    for key, value in custom_optuna_ranges.items():
+        if key not in new_optuna_ranges:
+            warnings.warn(
+                f'{key} is not a supported parameter! Skipping.',
+            )
+            continue
+        if isinstance(value, type(new_optuna_ranges[key])):
+            new_optuna_ranges[key] = value
+
+        else:
+            warnings.warn(
+                f'Custom optuna range for {key} is not the correct type='
+                f'{type(new_optuna_ranges[key])}. Using default range instead.',
+            )
+    return new_optuna_ranges

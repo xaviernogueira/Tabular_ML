@@ -21,6 +21,7 @@ from tabular_ml.base import (
     MLModel,
     ModelTypes,
     OptunaRangeDict,
+    get_optuna_ranges,
 )
 from tabular_ml.factory import ImplementedModel
 
@@ -127,7 +128,8 @@ class CatBoostRegressionModel(MLModel):
         CatBoost parameter search space for optuna.
         """
         # get parameter ranges
-        param_ranges = CatBoostRegressionModel.get_optuna_ranges(
+        param_ranges = get_optuna_ranges(
+            CatBoostRegressionModel.optuna_param_ranges,
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
@@ -287,7 +289,8 @@ class CatBoostClassificationModel(MLModel):
         CatBoost parameter search space for optuna.
         """
         # get parameter ranges
-        param_ranges = CatBoostClassificationModel.get_optuna_ranges(
+        param_ranges = get_optuna_ranges(
+            CatBoostClassificationModel.optuna_param_ranges,
             custom_optuna_ranges=custom_optuna_ranges,
         )
 

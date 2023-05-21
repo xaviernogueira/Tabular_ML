@@ -21,6 +21,8 @@ from tabular_ml.functions import (
 from tabular_ml.base import (
     MLModel,
     ModelTypes,
+    OptunaRangeDict,
+    get_optuna_ranges,
 )
 from tabular_ml.factory import ImplementedModel
 
@@ -29,6 +31,7 @@ from tabular_ml.factory import ImplementedModel
 class LinearRegressionModel(MLModel):
 
     model_type: ModelTypes = 'regression'
+    optuna_param_ranges = None
 
     @staticmethod
     def train_model(
@@ -99,9 +102,12 @@ class LinearRegressionModel(MLModel):
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
         random_state: Optional[int] = None,
+        custom_optuna_ranges: Optional[OptunaRangeDict] = None,
     ) -> float:
 
-        print('There are no hyperparameters to tune for LinearRegression.')
+        warnings.warn(
+            'There are no hyperparameters to tune for LinearRegression.'
+        )
         raise NotImplementedError
 
 
@@ -109,6 +115,9 @@ class LinearRegressionModel(MLModel):
 class RidgeRegressionModel(MLModel):
 
     model_type: ModelTypes = 'regression'
+    optuna_param_ranges: OptunaRangeDict = {
+        'alpha': (1e-5, 1e5),
+    }
 
     @staticmethod
     def train_model(
@@ -180,7 +189,14 @@ class RidgeRegressionModel(MLModel):
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
         random_state: Optional[int] = None,
+        custom_optuna_ranges: Optional[OptunaRangeDict] = None,
     ) -> float:
+
+        # get optuna params
+        param_ranges = get_optuna_ranges(
+            RidgeRegressionModel.optuna_param_ranges,
+            custom_optuna_ranges=custom_optuna_ranges,
+        )
 
         # set up training weights
         if weights is not None:
@@ -188,8 +204,11 @@ class RidgeRegressionModel(MLModel):
 
         # set up model params
         model_params = {
-            'alpha': trial.suggest_loguniform('alpha', 1e-5, 1e5),
-            # 'fit_intercept': trial.suggest_categorical('fit_intercept', [True, False]),
+            'alpha': trial.suggest_loguniform(
+                'alpha',
+                param_ranges['alpha'][0],
+                param_ranges['alpha'][-1],
+            ),
         }
 
         return performance_scoring(
@@ -209,6 +228,9 @@ class RidgeRegressionModel(MLModel):
 class LassoRegressionModel(MLModel):
 
     model_type: ModelTypes = 'regression'
+    optuna_param_ranges: OptunaRangeDict = {
+        'alpha': (1e-5, 1e5),
+    }
 
     @staticmethod
     def train_model(
@@ -280,12 +302,22 @@ class LassoRegressionModel(MLModel):
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
         random_state: Optional[int] = None,
+        custom_optuna_ranges: Optional[OptunaRangeDict] = None,
     ) -> float:
+
+        # get optuna params
+        param_ranges = get_optuna_ranges(
+            LassoRegressionModel.optuna_param_ranges,
+            custom_optuna_ranges=custom_optuna_ranges,
+        )
 
         # set up model params
         model_params = {
-            'alpha': trial.suggest_loguniform('alpha', 1e-5, 1e5),
-            # 'fit_intercept': trial.suggest_categorical('fit_intercept', [True, False]),
+            'alpha': trial.suggest_loguniform(
+                'alpha',
+                param_ranges['alpha'][0],
+                param_ranges['alpha'][-1],
+            ),
         }
 
         return performance_scoring(
@@ -305,6 +337,10 @@ class LassoRegressionModel(MLModel):
 class ElasticNetRegressionModel(MLModel):
 
     model_type: ModelTypes = 'regression'
+    optuna_param_ranges: OptunaRangeDict = {
+        'alpha': (1e-5, 1e5),
+        'l1_ratio': (0, 1),
+    }
 
     @staticmethod
     def train_model(
@@ -378,13 +414,27 @@ class ElasticNetRegressionModel(MLModel):
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
         random_state: Optional[int] = None,
+        custom_optuna_ranges: Optional[OptunaRangeDict] = None,
     ) -> float:
+
+        # get optuna params
+        param_ranges = get_optuna_ranges(
+            ElasticNetRegressionModel.optuna_param_ranges,
+            custom_optuna_ranges=custom_optuna_ranges,
+        )
 
         # set up model params
         model_params = {
-            'alpha': trial.suggest_loguniform('alpha', 1e-5, 1e5),
-            'l1_ratio': trial.suggest_uniform('l1_ratio', 0, 1),
-            # 'fit_intercept': trial.suggest_categorical('fit_intercept', [True, False]),
+            'alpha': trial.suggest_loguniform(
+                'alpha',
+                param_ranges['alpha'][0],
+                param_ranges['alpha'][-1],
+            ),
+            'l1_ratio': trial.suggest_uniform(
+                'l1_ratio',
+                param_ranges['l1_ratio'][0],
+                param_ranges['l1_ratio'][-1],
+            ),
         }
 
         return performance_scoring(
@@ -404,6 +454,13 @@ class ElasticNetRegressionModel(MLModel):
 class BayesianRidgeRegressionModel(MLModel):
 
     model_type: ModelTypes = 'regression'
+    optuna_param_ranges: OptunaRangeDict = {
+        'n_iter': (200, 1000),
+        'alpha_1': (1e-5, 1e5),
+        'alpha_2': (1e-5, 1e5),
+        'lambda_1': (1e-5, 1e5),
+        'lambda_2': (1e-5, 1e5),
+    }
 
     @staticmethod
     def train_model(
@@ -475,16 +532,42 @@ class BayesianRidgeRegressionModel(MLModel):
         weights: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
         random_state: Optional[int] = None,
+        custom_optuna_ranges: Optional[OptunaRangeDict] = None,
     ) -> float:
+
+        # get optuna params
+        param_ranges = get_optuna_ranges(
+            BayesianRidgeRegressionModel.optuna_param_ranges,
+            custom_optuna_ranges=custom_optuna_ranges,
+        )
 
         # set up model params
         model_params = {
-            'n_iter': trial.suggest_int('n_iter', 200, 1000),
-            'alpha_1': trial.suggest_loguniform('alpha_1', 1e-5, 1e5),
-            'alpha_2': trial.suggest_loguniform('alpha_2', 1e-5, 1e5),
-            'lambda_1': trial.suggest_loguniform('lambda_1', 1e-5, 1e5),
-            'lambda_2': trial.suggest_loguniform('lambda_2', 1e-5, 1e5),
-            # 'fit_intercept': trial.suggest_categorical('fit_intercept', [True, False]),
+            'n_iter': trial.suggest_int(
+                'n_iter',
+                param_ranges['n_iter'][0],
+                param_ranges['n_iter'][-1],
+            ),
+            'alpha_1': trial.suggest_loguniform(
+                'alpha_1',
+                param_ranges['alpha_1'][0],
+                param_ranges['alpha_1'][-1],
+            ),
+            'alpha_2': trial.suggest_loguniform(
+                'alpha_2',
+                param_ranges['alpha_2'][0],
+                param_ranges['alpha_2'][-1],
+            ),
+            'lambda_1': trial.suggest_loguniform(
+                'lambda_1',
+                param_ranges['lambda_1'][0],
+                param_ranges['lambda_1'][-1],
+            ),
+            'lambda_2': trial.suggest_loguniform(
+                'lambda_2',
+                param_ranges['lambda_2'][0],
+                param_ranges['lambda_2'][-1],
+            ),
         }
 
         return performance_scoring(
