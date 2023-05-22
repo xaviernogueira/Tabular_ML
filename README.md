@@ -12,7 +12,7 @@ Train, evaluate, ensemble, and optimize hyperparameters from a standardized inte
 
 ## Currently supported models
 
-## Evaluate 
+## Evaluate
 
 ## Optimize hyperparameters
 
