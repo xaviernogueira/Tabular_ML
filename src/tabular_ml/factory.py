@@ -71,9 +71,21 @@ class ModelFactory:
     @classmethod
     def get_regression_model(cls, model_name: str) -> MLModel:
         """Returns a registered regression model."""
-        return cls.__registered_models['regression'][model_name]
+        try:
+            return cls.__registered_models['regression'][model_name]
+        except KeyError:
+            raise KeyError(
+                f'Please provide a valid regression model name! '
+                f'Expected one of {cls.get_regression_models()}, got {model_name}',
+            )
 
     @classmethod
     def get_classification_model(cls, model_name: str) -> MLModel:
         """Returns a registered classification model."""
-        return cls.__registered_models['classification'][model_name]
+        try:
+            return cls.__registered_models['classification'][model_name]
+        except KeyError:
+            raise KeyError(
+                f'Please provide a valid classification model name! '
+                f'Expected one of {cls.get_classification_models()}, got {model_name}',
+            )
