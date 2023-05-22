@@ -1,4 +1,5 @@
 import warnings
+import functools
 from tabular_ml.base import (
     MLModel,
     ModelTypes,
@@ -11,6 +12,8 @@ from typing import (
 
 
 class ImplementedModel:
+
+    @functools.wraps(MLModel)
     def __init__(
         cls,
         args,
@@ -94,10 +97,8 @@ class ModelFactory:
     @classmethod
     def get_model(cls, model_name: str) -> MLModel:
         """Returns a registered model (type ambiguous)."""
-        if (
-            model_name in cls.get_classification_models().keys() &
-            model_name in cls.get_regression_models().keys()
-        ):
+        if (model_name in cls.get_classification_models()) & \
+                (model_name in cls.get_regression_models()):
             warnings.warn(
                 f'{model_name} is a registered model for both regression '
                 'and classification! This function will return the regression model.',

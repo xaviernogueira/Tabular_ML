@@ -21,8 +21,8 @@ from tabular_ml.base import (
     MLModel,
     ModelTypes,
     OptunaRangeDict,
-    get_optuna_ranges,
 )
+from tabular_ml.utilities import get_optuna_ranges
 from tabular_ml.factory import ImplementedModel
 
 
@@ -82,8 +82,9 @@ class CatBoostRegressionModel(MLModel):
         )
         return trained_model.predict(test_data_pool)
 
-    @staticmethod
+    @classmethod
     def train_and_predict(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -94,7 +95,7 @@ class CatBoostRegressionModel(MLModel):
         """Trains a CatBoost model and makes predictions"""
 
         # train a model
-        catboost_model = CatBoostRegressionModel.train_model(
+        catboost_model = cls.train_model(
             x_train,
             y_train,
             model_params,
@@ -105,15 +106,16 @@ class CatBoostRegressionModel(MLModel):
         # return predictions array
         return (
             catboost_model,
-            CatBoostRegressionModel.make_predictions(
+            cls.make_predictions(
                 trained_model=catboost_model,
                 x_test=x_test,
-                categorical_feature=categorical_features,
+                categorical_features=categorical_features,
             ),
         )
 
-    @staticmethod
+    @classmethod
     def objective(
+        cls,
         trial: Trial,
         features: pd.DataFrame,
         target: pd.Series,
@@ -129,7 +131,7 @@ class CatBoostRegressionModel(MLModel):
         """
         # get parameter ranges
         param_ranges = get_optuna_ranges(
-            CatBoostRegressionModel.optuna_param_ranges,
+            cls.optuna_param_ranges,
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
@@ -174,7 +176,7 @@ class CatBoostRegressionModel(MLModel):
         logging.info(f'\n----------------------\n{params}')
 
         return performance_scoring(
-            model=CatBoostRegressionModel,
+            model=cls,
             features=features,
             target=target,
             model_params=params,
@@ -243,8 +245,9 @@ class CatBoostClassificationModel(MLModel):
         class_idx = list(trained_model.classes_).index(1)
         return trained_model.predict_proba(test_data_pool)[:, class_idx]
 
-    @staticmethod
+    @classmethod
     def train_and_predict(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -255,7 +258,7 @@ class CatBoostClassificationModel(MLModel):
         """Trains a XGBoost model and makes predictions"""
 
         # train a model
-        catboost_model = CatBoostClassificationModel.train_model(
+        catboost_model = cls.train_model(
             x_train,
             y_train,
             model_params,
@@ -266,15 +269,16 @@ class CatBoostClassificationModel(MLModel):
         # return predictions array
         return (
             catboost_model,
-            CatBoostClassificationModel.make_predictions(
+            cls.make_predictions(
                 trained_model=catboost_model,
                 x_test=x_test,
-                categorical_feature=categorical_features,
+                categorical_features=categorical_features,
             ),
         )
 
-    @staticmethod
+    @classmethod
     def objective(
+        cls,
         trial: Trial,
         features: pd.DataFrame,
         target: pd.Series,
@@ -290,7 +294,7 @@ class CatBoostClassificationModel(MLModel):
         """
         # get parameter ranges
         param_ranges = get_optuna_ranges(
-            CatBoostClassificationModel.optuna_param_ranges,
+            cls.optuna_param_ranges,
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
@@ -341,7 +345,7 @@ class CatBoostClassificationModel(MLModel):
         logging.info(f'\n----------------------\n{params}')
 
         return performance_scoring(
-            model=CatBoostClassificationModel,
+            model=cls,
             features=features,
             target=target,
             model_params=params,

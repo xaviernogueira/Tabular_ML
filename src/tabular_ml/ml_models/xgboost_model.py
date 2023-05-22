@@ -20,8 +20,8 @@ from tabular_ml.base import (
     MLModel,
     ModelTypes,
     OptunaRangeDict,
-    get_optuna_ranges,
 )
+from tabular_ml.utilities import get_optuna_ranges
 from tabular_ml.factory import ImplementedModel
 
 
@@ -115,8 +115,9 @@ class XGBoostRegressionModel(MLModel):
 
         return trained_model.predict(test_data_matrix)
 
-    @staticmethod
+    @classmethod
     def train_and_predict(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -128,7 +129,7 @@ class XGBoostRegressionModel(MLModel):
         # TODO: enable custom eval function!
 
         # train the model
-        xgb_model = XGBoostRegressionModel.train_model(
+        xgb_model = cls.train_model(
             x_train,
             y_train,
             model_params.copy(),
@@ -139,15 +140,16 @@ class XGBoostRegressionModel(MLModel):
         # return prediction array
         return (
             xgb_model,
-            XGBoostRegressionModel.make_predictions(
+            cls.make_predictions(
                 trained_model=xgb_model,
                 x_test=x_test,
                 categorical_features=categorical_features,
             ),
         )
 
-    @staticmethod
+    @classmethod
     def objective(
+        cls,
         trial: Trial,
         features: pd.DataFrame,
         target: pd.Series,
@@ -164,7 +166,7 @@ class XGBoostRegressionModel(MLModel):
 
         # get parameter ranges
         param_ranges = get_optuna_ranges(
-            XGBoostRegressionModel.optuna_param_ranges,
+            cls.optuna_param_ranges,
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
@@ -210,7 +212,7 @@ class XGBoostRegressionModel(MLModel):
         logging.info(f'\n----------------------\n{params}')
 
         return performance_scoring(
-            model=XGBoostRegressionModel,
+            model=cls,
             features=features,
             target=target,
             model_params=params,

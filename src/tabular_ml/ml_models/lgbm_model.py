@@ -93,8 +93,9 @@ class LightGBMRegressionModel(MLModel):
             categorical_features=categorical_features,
         )
 
-    @staticmethod
+    @classmethod
     def train_and_predict(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -104,10 +105,10 @@ class LightGBMRegressionModel(MLModel):
     ) -> Tuple[lightgbm.Booster, np.ndarray]:
 
         # get trained model
-        lgbm_model = LightGBMRegressionModel.train_model(
+        lgbm_model = cls.train_model(
             x_train,
             y_train,
-            params=model_params.copy(),
+            model_params=model_params.copy(),
             weights_train=weights_train,
             categorical_features=categorical_features,
         )
@@ -115,15 +116,16 @@ class LightGBMRegressionModel(MLModel):
         # return prediction array
         return (
             lgbm_model,
-            LightGBMRegressionModel.make_predictions(
+            cls.make_predictions(
                 trained_model=lgbm_model,
                 x_test=x_test,
                 categorical_features=categorical_features,
             ),
         )
 
-    @staticmethod
+    @classmethod
     def objective(
+        cls,
         trial: Trial,
         features: pd.DataFrame,
         target: pd.Series,
@@ -157,7 +159,7 @@ class LightGBMRegressionModel(MLModel):
         logging.info(f'\n----------------------\n{params}')
 
         return performance_scoring(
-            model=LightGBMRegressionModel,
+            model=cls,
             features=features,
             target=target,
             model_params=params,

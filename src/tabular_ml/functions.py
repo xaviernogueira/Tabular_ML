@@ -1,6 +1,7 @@
 """Stores shared MLModel ABC, as well as functions for all MLModel implementations"""
 import dataclasses
 import time
+import warnings
 import logging
 import numpy as np
 import pandas as pd
@@ -8,11 +9,14 @@ import sklearn.metrics
 import sklearn.model_selection
 import optuna
 from datetime import datetime
-from tabular_ml.base import MLModel
+from tabular_ml.base import (
+    MLModel,
+    KFoldOutput,
+)
 from tabular_ml.factory import ModelFactory
+import tabular_ml.utilities as utilities
 from pathlib import Path
 from typing import (
-    Union,
     List,
     Dict,
     Optional,
@@ -20,57 +24,11 @@ from typing import (
 )
 
 
-@dataclasses.dataclass
-class KFoldOutput:
-    """A class to store Regression KFold CV outputs.
-
-    Attributes:
-        n_splits: # of K-Folds
-        random_state: random state used (can be None)
-        metric_function: name of the metric function used
-        metric_function_kwargs: kwargs passed to the metric function
-        using_training_weights: whether or not training weights were used
-        model_names: list of model names used
-        model_params: dict of model names as keys, model params as values
-        raw_model_scores: dict of model names as keys, raw scores as values
-        adj_model_scores: dict of model names as keys, adj scores as values
-        model_test_losses: dict of model names as keys, test losses as values
-        model_objects_by_fold: dict of k fold index keys, model objects as values
-        ensemble_raw_score: ensemble raw score
-        ensemble_adj_score: ensemble adj score
-        run_time: run time in seconds
-    """
-    n_splits: int
-    random_state: Union[int, None]
-    metric_function: str
-    metric_function_kwargs: Dict[str, Any]
-    using_training_weights: bool
-    model_names: List[str]
-    model_params: Dict[str, Dict[str, Union[float, int, str]]]
-    raw_model_scores: Dict[str, float]
-    adj_model_scores: Dict[str, float]
-    model_test_losses: Dict[str, List[float]]
-    model_objects_by_fold = Dict[str, Dict[str, object]]
-    ensemble_raw_score: float
-    ensemble_adj_score: float
-    run_time: int
-
-
-def get_ensemble_prediction(
-    model_predictions_dict: Dict[str, np.ndarray],
-) -> float:
-    """Combines numpy array predictions"""
-    return np.mean(
-        list(model_predictions_dict.values()),
-        axis=0,
-    )
-
-
 def k_fold_cv(
     x_data: pd.DataFrame,
     y_data: pd.Series,
     model_names: List[str],
-    model_params: Dict[str, Dict[str, Union[float, int, str]]],
+    model_params: Dict[str, Dict[str, float | int | str]],
     weights_data: Optional[pd.Series] = None,
     categorical_features: Optional[List[str]] = None,
     n_splits: Optional[int] = None,
@@ -187,7 +145,7 @@ def k_fold_cv(
         model_objects_by_fold[i] = model_objects
 
         # get ensemble prediction, calculate score
-        ensemble_preds = get_ensemble_prediction(
+        ensemble_preds = utilities.get_ensemble_prediction(
             model_predictions_dict=model_predictions,
         )
         model_test_losses['ensemble'].append(
@@ -202,8 +160,9 @@ def k_fold_cv(
     for model_name in model_test_losses.keys():
         test_losses = model_test_losses[model_name]
         raw_model_scores[model_name] = np.mean(np.array(test_losses))
-        adj_model_scores[model_name] = (
-            np.mean(np.array(test_losses)) + np.std(np.array(test_losses))
+        adj_model_scores[model_name] = utilities.get_adjusted_score(
+            test_losses,
+            metric_function,
         )
 
     # stop timer
@@ -212,7 +171,6 @@ def k_fold_cv(
     # return output as a class
     out_class = KFoldOutput(
         n_splits=n_splits,
-        random_state=random_state,
         metric_function=metric_function.__name__,
         metric_function_kwargs=metric_function_kwargs,
         using_training_weights=isinstance(weights_data, pd.Series),
@@ -225,6 +183,7 @@ def k_fold_cv(
         ensemble_raw_score=raw_model_scores['ensemble'],
         ensemble_adj_score=adj_model_scores['ensemble'],
         run_time=p2-p1,
+        random_state=random_state,
     )
     logging.info(f'Done! - {datetime.now()}')
     return out_class
@@ -234,7 +193,7 @@ def performance_scoring(
     model: MLModel | str,
     features: pd.DataFrame,
     target: pd.Series,
-    model_params: Dict[str, Union[float, int, str]],
+    model_params: Dict[str, float | int | str],
     k_folds: int,
     metric_function: callable,
     weights: Optional[pd.Series] = None,
@@ -323,7 +282,8 @@ def find_optimal_parameters(
 
     # create the optuna study
     logging.info(
-        f'Starting {model.__name__} optimization w/ n_trials={n_trials}, and timeout={timeout}',
+        f'Starting {model.__name__} optimization w/ n_trials={n_trials}, '
+        f'and timeout={timeout}',
     )
 
     logging.info(
@@ -345,20 +305,7 @@ def find_optimal_parameters(
     )
 
     # assume metric direction when possible
-    direction_dict = {
-        'mean_absolute_error': 'minimize',
-        'log_loss': 'minimize',
-        'r2_score': 'maximize',
-    }
-    if str(metric_function.__name__) in direction_dict.keys():
-        direction = direction_dict[str(metric_function.__name__)]
-    else:
-        logging.warn(
-            f'Optimal direction cannot be inferred from metric_function: '
-            f'{metric_function.__name__}. Please set param:direction to '
-            f'maximize or minimize. Default is minimize!',
-        )
-        direction = 'minimize'
+    direction = utilities.get_metric_direction(metric_function)
 
     # run the study
     study = optuna.create_study(direction=direction)
@@ -371,7 +318,8 @@ def find_optimal_parameters(
     # record end time and key results
     end_time = datetime.now()
     logging.info(
-        f'{metric_function.__name__} Optimization complete! Took {end_time - start_time}.\n',
+        f'{metric_function.__name__} Optimization complete! '
+        f'Took {end_time - start_time}.\n',
     )
 
     # log key stats

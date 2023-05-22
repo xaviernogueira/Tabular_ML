@@ -22,8 +22,8 @@ from tabular_ml.base import (
     MLModel,
     ModelTypes,
     OptunaRangeDict,
-    get_optuna_ranges,
 )
+from tabular_ml.utilities import get_optuna_ranges
 from tabular_ml.factory import ImplementedModel
 
 
@@ -64,8 +64,9 @@ class LinearRegressionModel(MLModel):
     ) -> np.ndarray:
         return trained_model.predict(x_test)
 
-    @staticmethod
+    @classmethod
     def train_and_predict(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -76,7 +77,7 @@ class LinearRegressionModel(MLModel):
         # ordinarily encode categorical features?
 
         # train model
-        model = LinearRegressionModel.train_model(
+        model = cls.train_model(
             x_train,
             y_train,
             model_params,
@@ -86,14 +87,15 @@ class LinearRegressionModel(MLModel):
 
         return (
             model,
-            LassoRegressionModel.make_predictions(
+            cls.make_predictions(
                 trained_model=model,
                 x_test=x_test,
             ),
         )
 
-    @staticmethod
+    @classmethod
     def objective(
+        cls,
         trial: Trial,
         features: pd.DataFrame,
         target: pd.Series,
@@ -151,8 +153,9 @@ class RidgeRegressionModel(MLModel):
     ) -> np.ndarray:
         return trained_model.predict(x_test)
 
-    @staticmethod
+    @classmethod
     def train_and_predict(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -163,7 +166,7 @@ class RidgeRegressionModel(MLModel):
         # one-hot-encode encode test categorical features
 
         # train model
-        model = RidgeRegressionModel.train_model(
+        model = cls.train_model(
             x_train,
             y_train,
             model_params,
@@ -173,14 +176,15 @@ class RidgeRegressionModel(MLModel):
 
         return (
             model,
-            RidgeRegressionModel.make_predictions(
+            cls.make_predictions(
                 trained_model=model,
                 x_test=x_test,
             ),
         )
 
-    @staticmethod
+    @classmethod
     def objective(
+        cls,
         trial: Trial,
         features: pd.DataFrame,
         target: pd.Series,
@@ -194,7 +198,7 @@ class RidgeRegressionModel(MLModel):
 
         # get optuna params
         param_ranges = get_optuna_ranges(
-            RidgeRegressionModel.optuna_param_ranges,
+            cls.optuna_param_ranges,
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
@@ -212,7 +216,7 @@ class RidgeRegressionModel(MLModel):
         }
 
         return performance_scoring(
-            model_class=RidgeRegressionModel,
+            model_class=cls,
             features=features,
             target=target,
             kfolds=kfolds,
@@ -264,8 +268,9 @@ class LassoRegressionModel(MLModel):
     ) -> np.ndarray:
         return trained_model.predict(x_test)
 
-    @staticmethod
+    @classmethod
     def train_and_predict(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -276,7 +281,7 @@ class LassoRegressionModel(MLModel):
         # one-hot-encode encode test categorical features
 
         # train model
-        model = LassoRegressionModel.train_model(
+        model = cls.train_model(
             x_train,
             y_train,
             model_params,
@@ -286,14 +291,15 @@ class LassoRegressionModel(MLModel):
 
         return (
             model,
-            LassoRegressionModel.make_predictions(
+            cls.make_predictions(
                 trained_model=model,
                 x_test=x_test,
             ),
         )
 
-    @staticmethod
+    @classmethod
     def objective(
+        cls,
         trial: Trial,
         features: pd.DataFrame,
         target: pd.Series,
@@ -307,7 +313,7 @@ class LassoRegressionModel(MLModel):
 
         # get optuna params
         param_ranges = get_optuna_ranges(
-            LassoRegressionModel.optuna_param_ranges,
+            cls.optuna_param_ranges,
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
@@ -321,7 +327,7 @@ class LassoRegressionModel(MLModel):
         }
 
         return performance_scoring(
-            model_class=LassoRegressionModel,
+            model_class=cls,
             features=features,
             target=target,
             kfolds=kfolds,
@@ -376,8 +382,9 @@ class ElasticNetRegressionModel(MLModel):
         # instance type is passed thru
         return trained_model.predict(x_test)
 
-    @staticmethod
+    @classmethod
     def train_and_predict(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -388,7 +395,7 @@ class ElasticNetRegressionModel(MLModel):
         # one-hot-encode encode test categorical features
 
         # train model
-        model = ElasticNetRegressionModel.train_model(
+        model = cls.train_model(
             x_train,
             y_train,
             model_params,
@@ -398,14 +405,15 @@ class ElasticNetRegressionModel(MLModel):
 
         return (
             model,
-            ElasticNetRegressionModel.make_predictions(
+            cls.make_predictions(
                 trained_model=model,
                 x_test=x_test,
             ),
         )
 
-    @staticmethod
+    @classmethod
     def objective(
+        cls,
         trial: Trial,
         features: pd.DataFrame,
         target: pd.Series,
@@ -419,7 +427,7 @@ class ElasticNetRegressionModel(MLModel):
 
         # get optuna params
         param_ranges = get_optuna_ranges(
-            ElasticNetRegressionModel.optuna_param_ranges,
+            cls.optuna_param_ranges,
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
@@ -438,7 +446,7 @@ class ElasticNetRegressionModel(MLModel):
         }
 
         return performance_scoring(
-            model_class=ElasticNetRegressionModel,
+            model_class=cls,
             features=features,
             target=target,
             kfolds=kfolds,
@@ -494,8 +502,9 @@ class BayesianRidgeRegressionModel(MLModel):
     ) -> np.ndarray:
         return trained_model.predict(x_test)
 
-    @staticmethod
+    @classmethod
     def train_and_predict(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         x_test: pd.DataFrame,
@@ -506,7 +515,7 @@ class BayesianRidgeRegressionModel(MLModel):
         # one-hot-encode encode test categorical features
 
         # train model
-        model = BayesianRidgeRegressionModel.train_model(
+        model = cls.train_model(
             x_train,
             y_train,
             model_params,
@@ -516,14 +525,15 @@ class BayesianRidgeRegressionModel(MLModel):
 
         return (
             model,
-            BayesianRidgeRegressionModel.make_predictions(
+            cls.make_predictions(
                 trained_model=model,
                 x_test=x_test,
             ),
         )
 
-    @staticmethod
+    @classmethod
     def objective(
+        cls,
         trial: Trial,
         features: pd.DataFrame,
         target: pd.Series,
@@ -537,7 +547,7 @@ class BayesianRidgeRegressionModel(MLModel):
 
         # get optuna params
         param_ranges = get_optuna_ranges(
-            BayesianRidgeRegressionModel.optuna_param_ranges,
+            cls.optuna_param_ranges,
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
@@ -571,7 +581,7 @@ class BayesianRidgeRegressionModel(MLModel):
         }
 
         return performance_scoring(
-            model_class=BayesianRidgeRegressionModel,
+            model_class=cls,
             features=features,
             target=target,
             kfolds=kfolds,
