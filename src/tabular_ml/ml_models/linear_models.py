@@ -378,8 +378,6 @@ class ElasticNetRegressionModel(MLModel):
         x_test: pd.DataFrame,
         categorical_features: Optional[List[str]] = None,
     ) -> np.ndarray:
-        # TODO: consider adding a shared warning to check that the expected model
-        # instance type is passed thru
         return trained_model.predict(x_test)
 
     @classmethod
