@@ -9,6 +9,8 @@ import sklearn.model_selection
 import optuna
 from datetime import datetime
 from tabular_ml.base import MLModel
+from tabular_ml.factory import ModelFactory
+from pathlib import Path
 from typing import (
     Union,
     List,
@@ -44,7 +46,7 @@ class KFoldOutput:
     metric_function_kwargs: Dict[str, Any]
     using_training_weights: bool
     model_names: List[str]
-    model_params: Dict[str, Dict[str, Any]]
+    model_params: Dict[str, Dict[str, Union[float, int, str]]]
     raw_model_scores: Dict[str, float]
     adj_model_scores: Dict[str, float]
     model_test_losses: Dict[str, List[float]]
@@ -67,25 +69,33 @@ def get_ensemble_prediction(
 def k_fold_cv(
     x_data: pd.DataFrame,
     y_data: pd.Series,
-    model_classes: Dict[str, MLModel],
-    model_params: Dict[str, Dict],
+    model_names: List[str],
+    model_params: Dict[str, Dict[str, Union[float, int, str]]],
     weights_data: Optional[pd.Series] = None,
     categorical_features: Optional[List[str]] = None,
     n_splits: Optional[int] = None,
     metric_function: Optional[callable] = None,
     metric_function_kwargs: Optional[Dict[str, Any]] = None,
     random_state: Optional[int] = None,
+    logging_file_path: Optional[str | Path] = None,
 ) -> KFoldOutput:
-    """Runs a Regression K-fold CV for any set of models.
+    """Runs K-fold CV for any set of models.
 
     Arguments:
-        prediction_functions: a dict with model names as keys,
-            and model prediction functions as values (matching args).
+        x_data: A pandas DataFrame of features.
+        y_data: A pandas Series of targets.
+        model_names: A list of valid model names.
+            Valid names can be queried using ModelFactory.get_all_models_dict().
         model_params: a dict with model names as keys,
             and parameters for that model as values.
+        weights_data: A pandas Series of training weights.
+        categorical_features: A list of categorical feature names.
+        n_splits: # of K-Folds. Default is 5.
         metric_function: A function with the signature
             f(y_true, y_preds, **kwargs) -> float. Default is R-Squared.
         metric_function_kwargs: Kwargs to pass to the metric function.
+        random_state: Random state to use for K-Folds.
+
     Returns:
         A populated KFoldOutput dataclass with relevant info.
 
@@ -95,12 +105,14 @@ def k_fold_cv(
     p1 = time.perf_counter()
 
     # init logging
+    handlers = [
+        logging.StreamHandler(),
+    ]
+    if logging_file_path is not None:
+        handlers.append(logging.FileHandler(logging_file_path))
     logging.basicConfig(
         level=logging.INFO,
-        handlers=[
-            logging.FileHandler('k_fold_CV_logging.log'),
-            logging.StreamHandler(),
-        ],
+        handlers=handlers,
     )
 
     # init output lists
@@ -108,8 +120,6 @@ def k_fold_cv(
     raw_model_scores = {}
     adj_model_scores = {}
     model_objects_by_fold = {}
-
-    model_names = list(model_classes.keys())
 
     for name in model_names:
         # store model losses for each fold
@@ -151,7 +161,9 @@ def k_fold_cv(
         # get predictions for each model, calculate score
         model_predictions = {}
         model_objects = {}
-        for model_name, model_class in model_classes.items():
+        for model_name in model_names:
+            model_class = ModelFactory.get_model(model_name)
+
             logging.info(f'Split {i} | {model_name} - {datetime.now()}')
             params = model_params[model_name].copy()
 
@@ -219,7 +231,7 @@ def k_fold_cv(
 
 
 def performance_scoring(
-    model: MLModel,
+    model: MLModel | str,
     features: pd.DataFrame,
     target: pd.Series,
     model_params: Dict[str, Union[float, int, str]],
@@ -232,11 +244,15 @@ def performance_scoring(
     """
     K-fold CV wrapper for Optuna optimization
     """
+    # get model class
+    if isinstance(model, str):
+        model = ModelFactory.get_model(model)
+
     # run K-fold CV and get scores
     kfolds_output = k_fold_cv(
         x_data=features,
         y_data=target,
-        model_classes={model.__name__: model},
+        model_names={model.__name__: model},
         model_params={model.__name__: model_params},
         weights_data=weights,
         categorical_features=categorical_features,
@@ -251,27 +267,58 @@ def performance_scoring(
 
 
 def find_optimal_parameters(
-    model: MLModel,
+    model: str,
     features: pd.DataFrame,
     target: pd.Series,
     metric_function: callable,
     direction: Optional[str] = None,
-    n_trials: int = 20,
+    n_trials: Optional[int] = None,
     timeout: Optional[int] = None,
-    kfolds: int = 5,
+    kfolds: Optional[int] = None,
     weights: Optional[pd.Series] = None,
     categorical_features: Optional[List[str]] = None,
     random_state: Optional[int] = None,
+    logging_file_path: Optional[str | Path] = None,
 ) -> Dict[str, Any]:
-    """Runs optuna optimization for a MLModel"""
+    """Runs optuna optimization for a MLModel.
+
+    Arguments:
+        model: A valid model name.
+            Valid names can be queried using ModelFactory.get_all_models_dict().
+        features: A pandas DataFrame of features.
+        target: A pandas Series of targets.
+        metric_function: A function with the signature
+            f(y_true, y_preds, **kwargs) -> float.
+        direction: 'maximize' or 'minimize' the metric function.
+            If None, will infer direction from metric function.
+        n_trials: # of trials to run. Default is 20.
+        timeout: # of seconds to run.
+        kfolds: # of K-Folds. Default is 5.
+        weights: A pandas Series of training weights.
+        categorical_features: A list of categorical feature names.
+        random_state: Random state to use for K-Folds.
+
+    Returns:
+        A dict of optimal parameters for the model.
+    """
+    # set defaults
+    if n_trials is None:
+        n_trials = 20
+    if kfolds is None:
+        kfolds = 5
+
+    # get model class
+    model = ModelFactory.get_model(model)
 
     # init logging
+    handlers = [
+        logging.StreamHandler(),
+    ]
+    if logging_file_path is not None:
+        handlers.append(logging.FileHandler(logging_file_path))
     logging.basicConfig(
         level=logging.INFO,
-        handlers=[
-            logging.FileHandler(f'ml_model_optimization.log'),
-            logging.StreamHandler(),
-        ],
+        handlers=handlers,
     )
 
     # create the optuna study

@@ -1,3 +1,4 @@
+import warnings
 from tabular_ml.base import (
     MLModel,
     ModelTypes,
@@ -89,3 +90,25 @@ class ModelFactory:
                 f'Please provide a valid classification model name! '
                 f'Expected one of {cls.get_classification_models()}, got {model_name}',
             )
+
+    @classmethod
+    def get_model(cls, model_name: str) -> MLModel:
+        """Returns a registered model (type ambiguous)."""
+        if (
+            model_name in cls.get_classification_models().keys() &
+            model_name in cls.get_regression_models().keys()
+        ):
+            warnings.warn(
+                f'{model_name} is a registered model for both regression '
+                'and classification! This function will return the regression model.'
+            )
+        try:
+            return cls.__registered_models['regression'][model_name]
+        except KeyError:
+            try:
+                return cls.__registered_models['classification'][model_name]
+            except KeyError:
+                raise KeyError(
+                    f'{model_name} is an invalid model name! '
+                    f'Use ModelFactory.get_all_models() to see registered models.',
+                )
