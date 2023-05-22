@@ -216,10 +216,10 @@ class RidgeRegressionModel(MLModel):
         }
 
         return performance_scoring(
-            model_class=cls,
+            model=cls,
             features=features,
             target=target,
-            kfolds=kfolds,
+            k_folds=kfolds,
             metric_function=metric_function,
             model_params=model_params,
             weights=weights,
@@ -327,10 +327,10 @@ class LassoRegressionModel(MLModel):
         }
 
         return performance_scoring(
-            model_class=cls,
+            model=cls,
             features=features,
             target=target,
-            kfolds=kfolds,
+            k_folds=kfolds,
             metric_function=metric_function,
             model_params=model_params,
             weights=weights,
@@ -446,10 +446,10 @@ class ElasticNetRegressionModel(MLModel):
         }
 
         return performance_scoring(
-            model_class=cls,
+            model=cls,
             features=features,
             target=target,
-            kfolds=kfolds,
+            k_folds=kfolds,
             metric_function=metric_function,
             model_params=model_params,
             weights=weights,
@@ -581,10 +581,10 @@ class BayesianRidgeRegressionModel(MLModel):
         }
 
         return performance_scoring(
-            model_class=cls,
+            model=cls,
             features=features,
             target=target,
-            kfolds=kfolds,
+            k_folds=kfolds,
             metric_function=metric_function,
             model_params=model_params,
             weights=weights,

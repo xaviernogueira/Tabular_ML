@@ -338,8 +338,8 @@ class CatBoostClassificationModel(MLModel):
         elif params['bootstrap_type'] == 'Bernoulli':
             params['subsample'] = trial.suggest_float(
                 'subsample',
-                param_ranges['bagging_temperature'][0],
-                param_ranges['bagging_temperature'][-1],
+                param_ranges['subsample'][0],
+                param_ranges['subsample'][-1],
             )
 
         logging.info(f'\n----------------------\n{params}')

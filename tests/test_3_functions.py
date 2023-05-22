@@ -8,7 +8,6 @@ import sklearn.datasets
 import sklearn.metrics
 import pandas as pd
 import tabular_ml
-from tabular_ml.functions import KFoldOutput
 
 
 def k_fold_test(
@@ -32,8 +31,8 @@ def k_fold_test(
         random_state=1,
         metric_function=metric_function,
     )
-    assert isinstance(full_results, KFoldOutput)
-    for key, field in KFoldOutput.__dataclass_fields__.items():
+    assert isinstance(full_results, tabular_ml.KFoldOutput)
+    for key, field in tabular_ml.KFoldOutput.__dataclass_fields__.items():
         assert field.name in dir(full_results)
 
         test_type = typing.get_origin(field.type)
@@ -44,15 +43,28 @@ def k_fold_test(
 
 
 def optuna_test(
-    model: tabular_ml.base.MLModel,
-    train: pd.DataFrame,
-    test: pd.DataFrame,
-    pred_col: str,
+    model_name: str,
+    x_data: pd.DataFrame,
+    y_data: pd.Series,
+    metric_function: callable,
 ) -> None:
-    raise NotImplementedError
+
+    try:
+        out_dict = tabular_ml.find_optimal_parameters(
+            model_name,
+            x_data,
+            y_data,
+            metric_function,
+            n_trials=2,
+            kfolds=2,
+        )
+        assert isinstance(out_dict, dict)
+    except NotImplementedError:
+        pass
 
 
-def test_regression_k_fold() -> None:
+def test_regression_models() -> None:
+    """Tests K-Fold CV and optuna optimization for regression models."""
 
     # get regression models
     regression_models = tabular_ml.ModelFactory.get_regression_models()
@@ -71,8 +83,18 @@ def test_regression_k_fold() -> None:
         metric_function=sklearn.metrics.r2_score,
     )
 
+    for model_name in regression_models:
+        optuna_test(
+            model_name,
+            data.drop(columns=[pred_col]),
+            data[pred_col],
+            metric_function=sklearn.metrics.r2_score,
+        )
 
-def test_classification_k_fold() -> None:
+
+def test_classification_models() -> None:
+    """Tests K-Fold CV and optuna optimization for classification models."""
+
     # get classification models
     classification_models = tabular_ml.ModelFactory.get_classification_models()
 
@@ -91,5 +113,14 @@ def test_classification_k_fold() -> None:
         metric_function=sklearn.metrics.log_loss,
     )
 
+    for model_name in classification_models:
+        optuna_test(
+            model_name,
+            data.drop(columns=[pred_col]),
+            data[pred_col],
+            metric_function=sklearn.metrics.log_loss,
+        )
 
-test_classification_k_fold()
+
+test_regression_models()
+test_classification_models()
