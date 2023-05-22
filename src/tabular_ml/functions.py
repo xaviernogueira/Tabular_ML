@@ -43,7 +43,7 @@ def k_fold_cv(
         x_data: A pandas DataFrame of features.
         y_data: A pandas Series of targets.
         model_names: A list of valid model names.
-            Valid names can be queried using ModelFactory.get_all_models_dict().
+            Valid names can be queried using ModelFactory.get_all_models().
         model_params: a dict with model names as keys,
             and parameters for that model as values.
         weights_data: A pandas Series of training weights.
@@ -243,7 +243,7 @@ def find_optimal_parameters(
 
     Arguments:
         model: A valid model name.
-            Valid names can be queried using ModelFactory.get_all_models_dict().
+            Valid names can be queried using ModelFactory.get_all_models().
         features: A pandas DataFrame of features.
         target: A pandas Series of targets.
         metric_function: A function with the signature

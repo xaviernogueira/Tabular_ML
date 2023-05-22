@@ -50,17 +50,12 @@ class ModelFactory:
         cls.__registered_models[model.model_type][model.__name__] = model
 
     @classmethod
-    def get_all_models(cls) -> List[str]:
-        """Returns all registered models."""
+    def get_all_models(cls) -> Dict[str, List[str]]:
+        """Returns all registered models sorted by types."""
         return {
             'regression': list(cls.__registered_models['regression'].keys()),
             'classification': list(cls.__registered_models['classification'].keys()),
         }
-
-    @classmethod
-    def get_all_models_dict(cls) -> Dict[str, MLModel]:
-        """Returns all registered models + objects as a dict."""
-        return cls.__registered_models
 
     @classmethod
     def get_regression_models(cls) -> List[str]:
