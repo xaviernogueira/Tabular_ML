@@ -100,7 +100,7 @@ class ModelFactory:
         ):
             warnings.warn(
                 f'{model_name} is a registered model for both regression '
-                'and classification! This function will return the regression model.'
+                'and classification! This function will return the regression model.',
             )
         try:
             return cls.__registered_models['regression'][model_name]
