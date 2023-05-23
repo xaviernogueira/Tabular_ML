@@ -21,7 +21,10 @@ from tabular_ml.base import (
     ModelTypes,
     OptunaRangeDict,
 )
-from tabular_ml.utilities import get_optuna_ranges
+from tabular_ml.utilities import (
+    get_optuna_suggestion_type,
+    get_optuna_ranges,
+)
 from tabular_ml.factory import ModelFactory
 
 
@@ -62,7 +65,13 @@ class BaseXGBoostModel(MLModel):
 
         params = {}
         for param in optuna_param_ranges.keys():
-            func = function_mapping[param]
+            if param in function_mapping.keys():
+                func = function_mapping[param]
+            else:
+                func = get_optuna_suggestion_type(
+                    trial,
+                    optuna_param_ranges[param],
+                )
             if func.__name__ == 'suggest_categorical':
                 params[param] = function_mapping[param](
                     param,
@@ -221,7 +230,7 @@ class BaseXGBoostModel(MLModel):
         # set up parameters
         params = cls.suggest_xgboost_params(
             trial,
-            cls.optuna_param_ranges,
+            param_ranges,
         )
 
         logging.info(f'\n----------------------\n{params}')

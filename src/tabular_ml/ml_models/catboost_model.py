@@ -23,7 +23,10 @@ from tabular_ml.base import (
     ModelTypes,
     OptunaRangeDict,
 )
-from tabular_ml.utilities import get_optuna_ranges
+from tabular_ml.utilities import (
+    get_optuna_ranges,
+    get_optuna_suggestion_type,
+)
 from tabular_ml.factory import ModelFactory
 
 CatBoostModels = Union[
@@ -39,6 +42,56 @@ class BaseCatBoostModel(MLModel):
     """
 
     model_type: ModelTypes = None
+
+    @staticmethod
+    def suggest_catboost_params(
+        trial: Trial,
+        optuna_param_ranges: OptunaRangeDict,
+    ) -> Dict[str, Any]:
+        """Suggest CatBoost parameters for optuna.
+
+        Shared between regression and classification models.
+
+        Arguments:
+            trial: the optuna trial object.
+            optuna_param_ranges: the model's optuna parameter ranges.
+
+        Returns:
+            The suggested parameters in a dictionary.
+        """
+
+        function_mapping = {
+            'learning_rate': trial.suggest_float,
+            'early_stopping_rounds': trial.suggest_int,
+            'depth': trial.suggest_int,
+            'bootstrap_type': trial.suggest_categorical,
+            'colsample_bylevel': trial.suggest_float,
+            'bagging_temperature': trial.suggest_float,
+            'subsample': trial.suggest_float,
+        }
+
+        params = {}
+        for param in optuna_param_ranges.keys():
+            if param in function_mapping.keys():
+                func = function_mapping[param]
+            else:
+                func = get_optuna_suggestion_type(
+                    trial,
+                    optuna_param_ranges[param],
+                )
+            if func.__name__ == 'suggest_categorical':
+                params[param] = function_mapping[param](
+                    param,
+                    optuna_param_ranges[param],
+                )
+            else:
+                params[param] = function_mapping[param](
+                    param,
+                    optuna_param_ranges[param][0],
+                    optuna_param_ranges[param][-1],
+                )
+
+        return params
 
     @classmethod
     def train_model(
@@ -134,51 +187,31 @@ class BaseCatBoostModel(MLModel):
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
-        # TODO: support more parameters
-        # https://catboost.ai/en/docs/references/training-parameters/common#bootstrap_type
-        params = {
-            'learning_rate': trial.suggest_float(
-                'learning_rate',
-                param_ranges['learning_rate'][0],
-                param_ranges['learning_rate'][-1],
-            ),
-            'early_stopping_rounds': trial.suggest_int(
-                'early_stopping_rounds',
-                param_ranges['early_stopping_rounds'][0],
-                param_ranges['early_stopping_rounds'][-1],
-            ),
-            'depth': trial.suggest_int(
-                'depth',
-                param_ranges['depth'][0],
-                param_ranges['depth'][-1],
-            ),
-            'bootstrap_type': trial.suggest_categorical(
-                'bootstrap_type',
-                param_ranges['bootstrap_type'],
-            ),
-        }
+        # set up parameters
+        params = cls.suggest_catboost_params(
+            trial,
+            param_ranges,
+        )
 
-        if 'task_type' in params.keys():
-            if not params['task_type'] == 'GPU':
-                params['colsample_bylevel'] = trial.suggest_float(
-                    'colsample_bylevel',
-                    param_ranges['colsample_bylevel'][0],
-                    param_ranges['colsample_bylevel'][-1],
-                )
+        # trim parameters based on task type
+        if 'task_type' in params.keys() and 'colsample_bylevel' in params.keys():
+            if params['task_type'] == 'GPU':
+                del params['colsample_bylevel']
 
+        # trim parameters based on boosting type
         if 'boosting_type' in params.keys():
-            if params['bootstrap_type'] == 'Bayesian':
-                params['bagging_temperature'] = trial.suggest_float(
-                    'bagging_temperature',
-                    param_ranges['bagging_temperature'][0],
-                    param_ranges['bagging_temperature'][-1],
-                )
-            elif params['bootstrap_type'] == 'Bernoulli':
-                params['subsample'] = trial.suggest_float(
-                    'subsample',
-                    param_ranges['subsample'][0],
-                    param_ranges['subsample'][-1],
-                )
+            if 'bootstrap_type' in params.keys():
+                if params['bootstrap_type'] != 'Bayesian':
+                    try:
+                        del params['bagging_temperature']
+                    except KeyError:
+                        pass
+
+                if params['bootstrap_type'] != 'Bernoulli':
+                    try:
+                        del params['subsample']
+                    except KeyError:
+                        pass
 
         logging.info(f'\n----------------------\n{params}')
 

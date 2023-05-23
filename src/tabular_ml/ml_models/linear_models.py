@@ -271,19 +271,19 @@ class ElasticNetRegressionModel(BaseLinearModel):
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
-        # set up model params
-        model_params = {
-            'alpha': trial.suggest_float(
-                'alpha',
-                param_ranges['alpha'][0],
-                param_ranges['alpha'][-1],
-            ),
-            'l1_ratio': trial.suggest_float(
-                'l1_ratio',
-                param_ranges['l1_ratio'][0],
-                param_ranges['l1_ratio'][-1],
-            ),
+        function_mapping = {
+            'alpha': trial.suggest_float,
+            'l1_ratio': trial.suggest_float,
         }
+
+        # set up model params
+        model_params = {}
+        for param in param_ranges.keys():
+            model_params[param] = function_mapping[param](
+                param,
+                param_ranges[param][0],
+                param_ranges[param][-1],
+            )
 
         return performance_scoring(
             model=cls,

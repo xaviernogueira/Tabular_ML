@@ -1,11 +1,15 @@
 import warnings
 import logging
 import numpy as np
+from optuna.trial import Trial
 from tabular_ml.base import (
     OptunaRangeDict,
 )
 from typing import (
+    Union,
     Dict,
+    List,
+    Tuple,
     Literal,
     Optional,
 )
@@ -16,6 +20,28 @@ MetricDirections: Dict[str, Literal['minimize', 'maximize']] = {
     'log_loss': 'minimize',
     'r2_score': 'maximize',
 }
+
+OptunaSuggestionTypes: Union[
+    Trial.suggest_float,
+    Trial.suggest_int,
+    Trial.suggest_categorical,
+]
+
+
+def get_optuna_suggestion_type(
+    trial: Trial,
+    value_range: Tuple[float, float] | Tuple[int, int] | List[str],
+) -> OptunaSuggestionTypes:
+    if isinstance(value_range, list):
+        return trial.suggest_categorical
+    elif isinstance(value_range[0], float) or isinstance(value_range[-1], float):
+        return trial.suggest_float
+    elif isinstance(value_range[0], int) and isinstance(value_range[-1], int):
+        return trial.suggest_int
+    else:
+        raise TypeError(
+            f'Optuna suggestion type not implemented for value_range: {value_range}',
+        )
 
 
 def get_metric_direction(
