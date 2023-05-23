@@ -1,4 +1,4 @@
-name: tabular_machine_learning
+name: tabular_ml
 channels:
   - conda-forge
   - nodefaults

@@ -12,6 +12,7 @@ from datetime import datetime
 from tabular_ml.base import (
     MLModel,
     KFoldOutput,
+    OptunaRangeDict,
 )
 from tabular_ml.factory import ModelFactory
 import tabular_ml.utilities as utilities
@@ -53,11 +54,10 @@ def k_fold_cv(
             f(y_true, y_preds, **kwargs) -> float. Default is R-Squared.
         metric_function_kwargs: Kwargs to pass to the metric function.
         random_state: Random state to use for K-Folds.
+        logging_file_path: Path to a log file.
 
     Returns:
         A populated KFoldOutput dataclass with relevant info.
-
-    NOTE: as of now this only works with Logloss -> generalize later?
     """
     # start timer
     p1 = time.perf_counter()
@@ -237,6 +237,7 @@ def find_optimal_parameters(
     weights: Optional[pd.Series] = None,
     categorical_features: Optional[List[str]] = None,
     random_state: Optional[int] = None,
+    custom_param_ranges: Optional[OptunaRangeDict] = None,
     logging_file_path: Optional[str | Path] = None,
 ) -> Dict[str, Any]:
     """Runs optuna optimization for a MLModel.
@@ -302,6 +303,7 @@ def find_optimal_parameters(
         weights=weights,
         categorical_features=categorical_features,
         random_state=random_state,
+        custom_param_ranges=custom_param_ranges,
     )
 
     # assume metric direction when possible
