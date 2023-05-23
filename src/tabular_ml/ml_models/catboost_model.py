@@ -39,7 +39,6 @@ class BaseCatBoostModel(MLModel):
     """
 
     model_type: ModelTypes = None
-    s
 
     @classmethod
     def train_model(

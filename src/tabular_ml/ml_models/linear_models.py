@@ -13,6 +13,7 @@ from typing import (
     List,
     Tuple,
     Optional,
+    Union,
     Any,
 )
 from tabular_ml.functions import (
@@ -26,28 +27,41 @@ from tabular_ml.base import (
 from tabular_ml.utilities import get_optuna_ranges
 from tabular_ml.factory import ImplementedModel
 
+LinearModels = Union[
+    sklearn.linear_model.LinearRegression,
+    sklearn.linear_model.Ridge,
+    sklearn.linear_model.Lasso,
+    sklearn.linear_model.ElasticNet,
+    sklearn.linear_model.BayesianRidge,
+]
 
-@ImplementedModel
-class LinearRegressionModel(MLModel):
 
-    model_type: ModelTypes = 'regression'
+class BaseLinearModel(MLModel):
+    """Base class for linear models.
+
+    NOTE: This is not intended to be used directly!
+    """
+
+    model_type: ModelTypes = None
+    model_object: LinearModels = None
     optuna_param_ranges = None
 
-    @staticmethod
+    @classmethod
     def train_model(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         model_params: Dict[str, Any],
         weights_train: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-    ) -> sklearn.linear_model.LinearRegression:
+    ) -> object:
 
         # set up training weights
         if weights_train is not None:
             weights_train = weights_train.values
 
         # init model
-        model = sklearn.linear_model.LinearRegression(**model_params)
+        model = cls.model_object(**model_params)
 
         # return the trained model
         return model.fit(
@@ -58,7 +72,7 @@ class LinearRegressionModel(MLModel):
 
     @staticmethod
     def make_predictions(
-        trained_model: sklearn.linear_model.LinearRegression,
+        trained_model: object,
         x_test: pd.DataFrame,
         categorical_features: Optional[List[str]] = None,
     ) -> np.ndarray:
@@ -73,7 +87,7 @@ class LinearRegressionModel(MLModel):
         model_params: Dict[str, Any],
         weights_train: Optional[pd.Series] = None,
         categorical_features: Optional[List[str]] = None,
-    ) -> Tuple[sklearn.linear_model.LinearRegression, np.ndarray]:
+    ) -> Tuple[object, np.ndarray]:
         # ordinarily encode categorical features?
 
         # train model
@@ -108,79 +122,27 @@ class LinearRegressionModel(MLModel):
     ) -> float:
 
         warnings.warn(
-            'There are no hyperparameters to tune for LinearRegression.',
+            f'There are no hyperparameters to tune for {type(cls.model_object)}',
         )
         raise NotImplementedError
 
 
 @ImplementedModel
-class RidgeRegressionModel(MLModel):
+class LinearRegressionModel(BaseLinearModel):
 
     model_type: ModelTypes = 'regression'
+    model_object: LinearModels = sklearn.linear_model.LinearRegression
+    optuna_param_ranges = None
+
+
+@ImplementedModel
+class RidgeRegressionModel(BaseLinearModel):
+
+    model_type: ModelTypes = 'regression'
+    model_object: LinearModels = sklearn.linear_model.Ridge
     optuna_param_ranges: OptunaRangeDict = {
         'alpha': (1e-5, 1e5),
     }
-
-    @staticmethod
-    def train_model(
-        x_train: pd.DataFrame,
-        y_train: pd.Series,
-        model_params: Dict[str, Any],
-        weights_train: Optional[pd.Series] = None,
-        categorical_features: Optional[List[str]] = None,
-    ) -> sklearn.linear_model.Ridge:
-        # one-hot-encode encode test categorical features
-
-        # set up training weights
-        if weights_train is not None:
-            weights_train = weights_train.values
-
-        # init model
-        model = sklearn.linear_model.Ridge(**model_params)
-
-        # return the trained model
-        return model.fit(
-            x_train,
-            y_train,
-            sample_weight=weights_train,
-        )
-
-    @staticmethod
-    def make_predictions(
-        trained_model: sklearn.linear_model.Ridge,
-        x_test: pd.DataFrame,
-        categorical_features: Optional[List[str]] = None,
-    ) -> np.ndarray:
-        return trained_model.predict(x_test)
-
-    @classmethod
-    def train_and_predict(
-        cls,
-        x_train: pd.DataFrame,
-        y_train: pd.Series,
-        x_test: pd.DataFrame,
-        model_params: Dict[str, Any],
-        weights_train: Optional[pd.Series] = None,
-        categorical_features: Optional[List[str]] = None,
-    ) -> Tuple[sklearn.linear_model.Ridge, np.ndarray]:
-        # one-hot-encode encode test categorical features
-
-        # train model
-        model = cls.train_model(
-            x_train,
-            y_train,
-            model_params,
-            weights_train,
-            categorical_features,
-        )
-
-        return (
-            model,
-            cls.make_predictions(
-                trained_model=model,
-                x_test=x_test,
-            ),
-        )
 
     @classmethod
     def objective(
@@ -229,73 +191,13 @@ class RidgeRegressionModel(MLModel):
 
 
 @ImplementedModel
-class LassoRegressionModel(MLModel):
+class LassoRegressionModel(BaseLinearModel):
 
     model_type: ModelTypes = 'regression'
+    model_object: LinearModels = sklearn.linear_model.Lasso
     optuna_param_ranges: OptunaRangeDict = {
         'alpha': (1e-5, 1e5),
     }
-
-    @staticmethod
-    def train_model(
-        x_train: pd.DataFrame,
-        y_train: pd.Series,
-        model_params: Dict[str, Any],
-        weights_train: Optional[pd.Series] = None,
-        categorical_features: Optional[List[str]] = None,
-    ) -> sklearn.linear_model.Lasso:
-        # one-hot-encode encode test categorical features
-
-        # set up training weights
-        if weights_train is not None:
-            weights_train = weights_train.values
-
-        # init model
-        model = sklearn.linear_model.Lasso(**model_params)
-
-        # return the trained model
-        return model.fit(
-            x_train,
-            y_train,
-            sample_weight=weights_train,
-        )
-
-    @staticmethod
-    def make_predictions(
-        trained_model: sklearn.linear_model.Lasso,
-        x_test: pd.DataFrame,
-        categorical_features: Optional[List[str]] = None,
-    ) -> np.ndarray:
-        return trained_model.predict(x_test)
-
-    @classmethod
-    def train_and_predict(
-        cls,
-        x_train: pd.DataFrame,
-        y_train: pd.Series,
-        x_test: pd.DataFrame,
-        model_params: Dict[str, Any],
-        weights_train: Optional[pd.Series] = None,
-        categorical_features: Optional[List[str]] = None,
-    ) -> Tuple[sklearn.linear_model.Lasso, np.ndarray]:
-        # one-hot-encode encode test categorical features
-
-        # train model
-        model = cls.train_model(
-            x_train,
-            y_train,
-            model_params,
-            weights_train,
-            categorical_features,
-        )
-
-        return (
-            model,
-            cls.make_predictions(
-                trained_model=model,
-                x_test=x_test,
-            ),
-        )
 
     @classmethod
     def objective(
@@ -340,74 +242,14 @@ class LassoRegressionModel(MLModel):
 
 
 @ImplementedModel
-class ElasticNetRegressionModel(MLModel):
+class ElasticNetRegressionModel(BaseLinearModel):
 
     model_type: ModelTypes = 'regression'
+    model_object: LinearModels = sklearn.linear_model.ElasticNet
     optuna_param_ranges: OptunaRangeDict = {
         'alpha': (1e-5, 1e5),
         'l1_ratio': (0, 1),
     }
-
-    @staticmethod
-    def train_model(
-        x_train: pd.DataFrame,
-        y_train: pd.Series,
-        model_params: Dict[str, Any],
-        weights_train: Optional[pd.Series] = None,
-        categorical_features: Optional[List[str]] = None,
-    ) -> sklearn.linear_model.ElasticNet:
-        # one-hot-encode encode test categorical features
-
-        # set up training weights
-        if weights_train is not None:
-            weights_train = weights_train.values
-
-        # init model
-        model = sklearn.linear_model.ElasticNet(**model_params)
-
-        # return the trained model
-        return model.fit(
-            x_train,
-            y_train,
-            sample_weight=weights_train,
-        )
-
-    @staticmethod
-    def make_predictions(
-        trained_model: sklearn.linear_model.ElasticNet,
-        x_test: pd.DataFrame,
-        categorical_features: Optional[List[str]] = None,
-    ) -> np.ndarray:
-        return trained_model.predict(x_test)
-
-    @classmethod
-    def train_and_predict(
-        cls,
-        x_train: pd.DataFrame,
-        y_train: pd.Series,
-        x_test: pd.DataFrame,
-        model_params: Dict[str, Any],
-        weights_train: Optional[pd.Series] = None,
-        categorical_features: Optional[List[str]] = None,
-    ) -> Tuple[sklearn.linear_model.ElasticNet, np.ndarray]:
-        # one-hot-encode encode test categorical features
-
-        # train model
-        model = cls.train_model(
-            x_train,
-            y_train,
-            model_params,
-            weights_train,
-            categorical_features,
-        )
-
-        return (
-            model,
-            cls.make_predictions(
-                trained_model=model,
-                x_test=x_test,
-            ),
-        )
 
     @classmethod
     def objective(
@@ -457,9 +299,10 @@ class ElasticNetRegressionModel(MLModel):
 
 
 @ImplementedModel
-class BayesianRidgeRegressionModel(MLModel):
+class BayesianRidgeRegressionModel(BaseLinearModel):
 
     model_type: ModelTypes = 'regression'
+    model_object: LinearModels = sklearn.linear_model.BayesianRidge
     optuna_param_ranges: OptunaRangeDict = {
         'n_iter': (200, 1000),
         'alpha_1': (1e-5, 1e5),
@@ -467,67 +310,6 @@ class BayesianRidgeRegressionModel(MLModel):
         'lambda_1': (1e-5, 1e5),
         'lambda_2': (1e-5, 1e5),
     }
-
-    @staticmethod
-    def train_model(
-        x_train: pd.DataFrame,
-        y_train: pd.Series,
-        model_params: Dict[str, Any],
-        weights_train: Optional[pd.Series] = None,
-        categorical_features: Optional[List[str]] = None,
-    ) -> sklearn.linear_model.BayesianRidge:
-        # one-hot-encode encode test categorical features
-
-        # set up training weights
-        if weights_train is not None:
-            weights_train = weights_train.values
-
-        # init model
-        model = sklearn.linear_model.BayesianRidge(**model_params)
-
-        # return the trained model
-        return model.fit(
-            x_train,
-            y_train,
-            sample_weight=weights_train,
-        )
-
-    @staticmethod
-    def make_predictions(
-        trained_model: sklearn.linear_model.BayesianRidge,
-        x_test: pd.DataFrame,
-        categorical_features: Optional[List[str]] = None,
-    ) -> np.ndarray:
-        return trained_model.predict(x_test)
-
-    @classmethod
-    def train_and_predict(
-        cls,
-        x_train: pd.DataFrame,
-        y_train: pd.Series,
-        x_test: pd.DataFrame,
-        model_params: Dict[str, Any],
-        weights_train: Optional[pd.Series] = None,
-        categorical_features: Optional[List[str]] = None,
-    ) -> Tuple[sklearn.linear_model.BayesianRidge, np.ndarray]:
-        # one-hot-encode encode test categorical features
-
-        # train model
-        model = cls.train_model(
-            x_train,
-            y_train,
-            model_params,
-            weights_train,
-            categorical_features,
-        )
-
-        return (
-            model,
-            cls.make_predictions(
-                trained_model=model,
-                x_test=x_test,
-            ),
-        )
 
     @classmethod
     def objective(
@@ -549,34 +331,22 @@ class BayesianRidgeRegressionModel(MLModel):
             custom_optuna_ranges=custom_optuna_ranges,
         )
 
-        # set up model params
-        model_params = {
-            'n_iter': trial.suggest_int(
-                'n_iter',
-                param_ranges['n_iter'][0],
-                param_ranges['n_iter'][-1],
-            ),
-            'alpha_1': trial.suggest_loguniform(
-                'alpha_1',
-                param_ranges['alpha_1'][0],
-                param_ranges['alpha_1'][-1],
-            ),
-            'alpha_2': trial.suggest_loguniform(
-                'alpha_2',
-                param_ranges['alpha_2'][0],
-                param_ranges['alpha_2'][-1],
-            ),
-            'lambda_1': trial.suggest_loguniform(
-                'lambda_1',
-                param_ranges['lambda_1'][0],
-                param_ranges['lambda_1'][-1],
-            ),
-            'lambda_2': trial.suggest_loguniform(
-                'lambda_2',
-                param_ranges['lambda_2'][0],
-                param_ranges['lambda_2'][-1],
-            ),
+        function_map = {
+            'n_iter': trial.suggest_int,
+            'alpha_1': trial.suggest_loguniform,
+            'alpha_2': trial.suggest_loguniform,
+            'lambda_1': trial.suggest_loguniform,
+            'lambda_2': trial.suggest_loguniform,
         }
+
+        # set up model params
+        model_params = {}
+        for param in param_ranges.keys():
+            model_params[param] = function_map[param](
+                param,
+                param_ranges[param][0],
+                param_ranges[param][-1],
+            )
 
         return performance_scoring(
             model=cls,
