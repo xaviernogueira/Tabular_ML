@@ -25,7 +25,7 @@ from tabular_ml.base import (
     OptunaRangeDict,
 )
 from tabular_ml.utilities import get_optuna_ranges
-from tabular_ml.factory import ImplementedModel
+from tabular_ml.factory import ModelFactory
 
 LinearModels = Union[
     sklearn.linear_model.LinearRegression,
@@ -127,7 +127,7 @@ class BaseLinearModel(MLModel):
         raise NotImplementedError
 
 
-@ImplementedModel
+@ModelFactory.implemented_model
 class LinearRegressionModel(BaseLinearModel):
 
     model_type: ModelTypes = 'regression'
@@ -135,7 +135,7 @@ class LinearRegressionModel(BaseLinearModel):
     optuna_param_ranges = None
 
 
-@ImplementedModel
+@ModelFactory.implemented_model
 class RidgeRegressionModel(BaseLinearModel):
 
     model_type: ModelTypes = 'regression'
@@ -190,7 +190,7 @@ class RidgeRegressionModel(BaseLinearModel):
         )
 
 
-@ImplementedModel
+@ModelFactory.implemented_model
 class LassoRegressionModel(BaseLinearModel):
 
     model_type: ModelTypes = 'regression'
@@ -241,7 +241,7 @@ class LassoRegressionModel(BaseLinearModel):
         )
 
 
-@ImplementedModel
+@ModelFactory.implemented_model
 class ElasticNetRegressionModel(BaseLinearModel):
 
     model_type: ModelTypes = 'regression'
@@ -298,7 +298,7 @@ class ElasticNetRegressionModel(BaseLinearModel):
         )
 
 
-@ImplementedModel
+@ModelFactory.implemented_model
 class BayesianRidgeRegressionModel(BaseLinearModel):
 
     model_type: ModelTypes = 'regression'

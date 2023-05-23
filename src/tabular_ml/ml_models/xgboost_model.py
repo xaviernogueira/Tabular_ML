@@ -22,7 +22,7 @@ from tabular_ml.base import (
     OptunaRangeDict,
 )
 from tabular_ml.utilities import get_optuna_ranges
-from tabular_ml.factory import ImplementedModel
+from tabular_ml.factory import ModelFactory
 
 
 class BaseXGBoostModel(MLModel):
@@ -239,7 +239,7 @@ class BaseXGBoostModel(MLModel):
         )
 
 
-@ImplementedModel
+@ModelFactory.implemented_model
 class XGBoostRegressionModel(BaseXGBoostModel):
 
     model_type: ModelTypes = 'regression'
@@ -255,7 +255,7 @@ class XGBoostRegressionModel(BaseXGBoostModel):
     }
 
 
-@ImplementedModel
+@ModelFactory.implemented_model
 class XGBoostClassificationModel(BaseXGBoostModel):
 
     model_type: ModelTypes = 'classification'

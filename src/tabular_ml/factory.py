@@ -11,30 +11,6 @@ from typing import (
 )
 
 
-class ImplementedModel:
-
-    @functools.wraps(MLModel)
-    def __init__(
-        cls,
-        args,
-    ) -> None:
-        """Initializes an implemented model."""
-        if not issubclass(args, MLModel):
-            raise TypeError(
-                f'Please provide a valid model implementation! '
-                f'Expected a subclass of MLModel, got {type(args)}',
-            )
-        if args.model_type not in get_args(ModelTypes):
-            raise TypeError(
-                f'Please provide a valid model type! '
-                f'Expected one of {ModelTypes}, got {args.model_type}',
-            )
-        for func in MLModel.__abstractmethods__:
-            assert hasattr(args, func)
-
-        ModelFactory.register_model(args)
-
-
 class ModelFactory:
     __registered_models = {
         'regression': {},
@@ -42,11 +18,32 @@ class ModelFactory:
     }
 
     @classmethod
+    def implemented_model(
+        cls,
+        args,
+    ) -> None:
+        """Decorator to register a model implementation."""
+        cls.register_model(args)
+
+    @classmethod
     def register_model(
         cls,
         model: MLModel,
     ) -> None:
         """Registers a model."""
+        if not issubclass(model, MLModel):
+            raise TypeError(
+                f'Please provide a valid model implementation! '
+                f'Expected a subclass of MLModel, got {type(model)}',
+            )
+        if model.model_type not in get_args(ModelTypes):
+            raise TypeError(
+                f'Please provide a valid model type! '
+                f'Expected one of {ModelTypes}, got {model.model_type}',
+            )
+        for func in MLModel.__abstractmethods__:
+            assert hasattr(model, func)
+
         cls.__registered_models[model.model_type][model.__name__] = model
 
     @classmethod

@@ -24,7 +24,7 @@ from tabular_ml.base import (
     OptunaRangeDict,
 )
 from tabular_ml.utilities import get_optuna_ranges
-from tabular_ml.factory import ImplementedModel
+from tabular_ml.factory import ModelFactory
 
 CatBoostModels = Union[
     catboost.CatBoostRegressor,
@@ -195,7 +195,7 @@ class BaseCatBoostModel(MLModel):
         )
 
 
-@ImplementedModel
+@ModelFactory.implemented_model
 class CatBoostRegressionModel(BaseCatBoostModel):
 
     model_type: ModelTypes = 'regression'
@@ -226,7 +226,7 @@ class CatBoostRegressionModel(BaseCatBoostModel):
         return trained_model.predict(test_data_pool)
 
 
-@ImplementedModel
+@ModelFactory.implemented_model
 class CatBoostClassificationModel(BaseCatBoostModel):
 
     model_type: ModelTypes = 'classification'

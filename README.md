@@ -12,7 +12,7 @@ Train, evaluate, ensemble, and optimize hyperparameters from a standardized inte
 * Train models efficiently without worrying about library differences! `tabular_ml` implements library specific, performance oriented, patterns/classes under-the-hood (i.e., `xgboost.DMatrix -> xgboost.Booster`).
 * Automate the K-Fold evaluation process across multiple models simultaneously (including ensembles).
 * Rapidly optimize hyperparameters using [`optuna`](https://optuna.org/). Leverage our built-in parameter search spaces, or adjust to your needs.
-* Behavior you can trust long term. We use a type-checking "factory" design pattern and robust test suite to provide reliability as the library grows over time.
+* Plugin-able. Write your own plugins to extend functionality without forking (and consider contributing your plugins!).
 
 
 # Library Documentation
@@ -24,7 +24,7 @@ pip install tabular_ml
 ```
 ## Using models
 
-### Explore model offerings
+### Included model offerings
 We use `tabular_ml.ModelFactory` to keep track of all supported regression and classification models. One can programmatically explore model offerings with the following functions:
 
 ```python
@@ -41,7 +41,7 @@ tabular_ml.ModelFactory.get_all_models()
 ```
 
 ### `MLModel` objects
-Each model registered to `ModelFactory` must be a concrete implementation of the `tabular_ml.base.MLModel` abstract base class. 
+Each model registered to `ModelFactory` must be a concrete implementation of the `tabular_ml.base.MLModel` abstract base class.
 
 This means that all registered models contain the following functions allowing them to be used interchangeably:
 ```python
@@ -90,6 +90,8 @@ def objective(
 ```
 
 
+### Plugin your model
+As long as you follow the design
 ### Currently supported models
 **[`catboost`](https://catboost.ai/en/docs/)**
 * `CatBoostRegressionModel`
@@ -97,6 +99,7 @@ def objective(
 
 **[`xgboost`](https://xgboost.readthedocs.io/en/stable/python/index.html)**
 * `XGBoostRegressionModel`
+* `XGBoostClassificationModel`
 
 **[`lightgbm`](https://lightgbm.readthedocs.io/en/v3.3.2/)**
 * `LightGBMRegressionModel`
@@ -108,7 +111,7 @@ def objective(
 * `ElasticNetRegressionModel`
 * `BayesianRidgeRegressionModel`
 
-## 
+##
 
 ## Optimize hyperparameters
 

@@ -19,16 +19,17 @@ from tabular_ml.functions import (
 from tabular_ml.base import (
     MLModel,
     ModelTypes,
+    OptunaRangeDict,
 )
-from tabular_ml.factory import ImplementedModel
+from tabular_ml.factory import ModelFactory
 
 # TODO: Finish this implementation
 
 
-@ImplementedModel
-class LightGBMRegressionModel(MLModel):
+class BaseLightGBMModel(MLModel):
 
-    model_type: ModelTypes = 'regression'
+    model_type: ModelTypes = None
+    optuna_param_ranges: OptunaRangeDict = None
 
     @staticmethod
     def train_model(
@@ -141,6 +142,10 @@ class LightGBMRegressionModel(MLModel):
         LightGBM parameter search space for optuna.
         """
 
+        function_mapping = {
+            'regression': 'regression',
+            'classification': 'binary',
+        }
         # fill in more via https://catboost.ai/en/docs/references/training-parameters/common#bootstrap_type
         params = {
             #    'eval_metric': trial.suggest_categorical(
@@ -171,3 +176,18 @@ class LightGBMRegressionModel(MLModel):
             categorical_features=categorical_features,
             random_state=random_state,
         )
+
+
+# @ModelFactory.implemented_model
+class LightGBMRegressionModel(BaseLightGBMModel):
+    model_type: ModelTypes = 'regression'
+    optuna_param_ranges: OptunaRangeDict = {
+        'objective': ['reg:squarederror'],
+        'eval_metric': ['mae'],
+        'early_stopping_rounds': (10, 100),
+        'lambda': (3, 8),
+        'learning_rate': (0.01, 0.4),
+        'max_depth': (2, 8),
+        'colsample_bytree': (0.5, 1.0),
+        'num_boost_round': (250, 1500),
+    }
