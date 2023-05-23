@@ -237,7 +237,7 @@ def find_optimal_parameters(
     weights: Optional[pd.Series] = None,
     categorical_features: Optional[List[str]] = None,
     random_state: Optional[int] = None,
-    custom_param_ranges: Optional[OptunaRangeDict] = None,
+    custom_optuna_ranges: Optional[OptunaRangeDict] = None,
     logging_file_path: Optional[str | Path] = None,
 ) -> Dict[str, Any]:
     """Runs optuna optimization for a MLModel.
@@ -257,6 +257,8 @@ def find_optimal_parameters(
         weights: A pandas Series of training weights.
         categorical_features: A list of categorical feature names.
         random_state: Random state to use for K-Folds.
+        custom_optuna_ranges: A dict of custom optuna ranges.
+        logging_file_path: Path to a log file.
 
     Returns:
         A dict of optimal parameters for the model.
@@ -303,7 +305,7 @@ def find_optimal_parameters(
         weights=weights,
         categorical_features=categorical_features,
         random_state=random_state,
-        custom_param_ranges=custom_param_ranges,
+        custom_optuna_ranges=custom_optuna_ranges,
     )
 
     # assume metric direction when possible
