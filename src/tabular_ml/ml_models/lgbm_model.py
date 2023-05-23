@@ -183,7 +183,7 @@ class LightGBMRegressionModel(BaseLightGBMModel):
     model_type: ModelTypes = 'regression'
     optuna_param_ranges: OptunaRangeDict = {
         'objective': ['reg:squarederror'],
-        'eval_metric': ['mae'],
+        'eval_metric': ['mae', 'rmse'],
         'early_stopping_rounds': (10, 100),
         'lambda': (3, 8),
         'learning_rate': (0.01, 0.4),

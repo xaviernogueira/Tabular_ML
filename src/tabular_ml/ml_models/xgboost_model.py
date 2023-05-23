@@ -65,14 +65,12 @@ class BaseXGBoostModel(MLModel):
 
         params = {}
         for param in optuna_param_ranges.keys():
-            if param in function_mapping.keys():
-                func = function_mapping[param]
-            else:
-                func = get_optuna_suggestion_type(
+            if param not in function_mapping.keys():
+                function_mapping[param] = get_optuna_suggestion_type(
                     trial,
                     optuna_param_ranges[param],
                 )
-            if func.__name__ == 'suggest_categorical':
+            if function_mapping[param].__name__ == 'suggest_categorical':
                 params[param] = function_mapping[param](
                     param,
                     optuna_param_ranges[param],

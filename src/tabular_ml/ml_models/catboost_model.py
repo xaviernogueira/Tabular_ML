@@ -72,14 +72,12 @@ class BaseCatBoostModel(MLModel):
 
         params = {}
         for param in optuna_param_ranges.keys():
-            if param in function_mapping.keys():
-                func = function_mapping[param]
-            else:
-                func = get_optuna_suggestion_type(
+            if param not in function_mapping.keys():
+                function_mapping[param] = get_optuna_suggestion_type(
                     trial,
                     optuna_param_ranges[param],
                 )
-            if func.__name__ == 'suggest_categorical':
+            if function_mapping[param].__name__ == 'suggest_categorical':
                 params[param] = function_mapping[param](
                     param,
                     optuna_param_ranges[param],
@@ -198,20 +196,19 @@ class BaseCatBoostModel(MLModel):
             if params['task_type'] == 'GPU':
                 del params['colsample_bylevel']
 
-        # trim parameters based on boosting type
-        if 'boosting_type' in params.keys():
-            if 'bootstrap_type' in params.keys():
-                if params['bootstrap_type'] != 'Bayesian':
-                    try:
-                        del params['bagging_temperature']
-                    except KeyError:
-                        pass
+        # trim parameters based on bootstrap_type type
+        if 'bootstrap_type' in params.keys():
+            if params['bootstrap_type'] != 'Bayesian':
+                try:
+                    del params['bagging_temperature']
+                except KeyError:
+                    pass
 
-                if params['bootstrap_type'] != 'Bernoulli':
-                    try:
-                        del params['subsample']
-                    except KeyError:
-                        pass
+            if params['bootstrap_type'] != 'Bernoulli':
+                try:
+                    del params['subsample']
+                except KeyError:
+                    pass
 
         logging.info(f'\n----------------------\n{params}')
 

@@ -21,7 +21,7 @@ MetricDirections: Dict[str, Literal['minimize', 'maximize']] = {
     'r2_score': 'maximize',
 }
 
-OptunaSuggestionTypes: Union[
+OptunaSuggestionTypes = Union[
     Trial.suggest_float,
     Trial.suggest_int,
     Trial.suggest_categorical,
