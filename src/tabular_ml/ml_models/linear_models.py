@@ -170,7 +170,7 @@ class RidgeRegressionModel(BaseLinearModel):
 
         # set up model params
         model_params = {
-            'alpha': trial.suggest_loguniform(
+            'alpha': trial.suggest_float(
                 'alpha',
                 param_ranges['alpha'][0],
                 param_ranges['alpha'][-1],
@@ -221,7 +221,7 @@ class LassoRegressionModel(BaseLinearModel):
 
         # set up model params
         model_params = {
-            'alpha': trial.suggest_loguniform(
+            'alpha': trial.suggest_float(
                 'alpha',
                 param_ranges['alpha'][0],
                 param_ranges['alpha'][-1],
@@ -273,7 +273,7 @@ class ElasticNetRegressionModel(BaseLinearModel):
 
         # set up model params
         model_params = {
-            'alpha': trial.suggest_loguniform(
+            'alpha': trial.suggest_float(
                 'alpha',
                 param_ranges['alpha'][0],
                 param_ranges['alpha'][-1],
@@ -333,10 +333,10 @@ class BayesianRidgeRegressionModel(BaseLinearModel):
 
         function_map = {
             'n_iter': trial.suggest_int,
-            'alpha_1': trial.suggest_loguniform,
-            'alpha_2': trial.suggest_loguniform,
-            'lambda_1': trial.suggest_loguniform,
-            'lambda_2': trial.suggest_loguniform,
+            'alpha_1': trial.suggest_float,
+            'alpha_2': trial.suggest_float,
+            'lambda_1': trial.suggest_float,
+            'lambda_2': trial.suggest_float,
         }
 
         # set up model params
