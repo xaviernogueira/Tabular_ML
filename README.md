@@ -24,8 +24,8 @@ pip install tabular_ml
 ```
 
 ## Using models
-
-### See model offerings
+When using the evaluation and optimization func
+### odel offerings
 We use `tabular_ml.ModelFactory` to keep track of all supported regression and classification models. One can programmatically explore model offerings with the following functions:
 
 ```python
@@ -40,6 +40,40 @@ tabular_ml.ModelFactory.get_regression_models()
 # get a dictionary storing both the above lists
 tabular_ml.ModelFactory.get_all_models()
 ```
+
+It is also best practice to get model_objects from the factory rather than importing from the `tabular_ml.ml_models` module. Below we demonstrate getting the `CatBoostRegressionModel` object.
+
+```python
+import tabular_ml
+
+# get the model from the factory
+obj = tabular_ml.ModelFactory.get_model('CatBoostRegressionModel')
+
+# use it!
+trained_model = obj.train_model(
+    ...
+)
+```
+
+### Included `MLModel` implementations
+**[`catboost`](https://catboost.ai/en/docs/)**
+* `CatBoostRegressionModel`
+* `CatBoostClassificationModel`
+
+**[`xgboost`](https://xgboost.readthedocs.io/en/stable/python/index.html)**
+* `XGBoostRegressionModel`
+* `XGBoostClassificationModel`
+
+**[`lightgbm`](https://lightgbm.readthedocs.io/en/v3.3.2/)**
+* `LightGBMRegressionModel`
+* `LightGBMClassificationModel`
+
+**[`sklearn.linear_models`](https://scikit-learn.org/stable/modules/linear_model.html)**
+* `LinearRegressionModel`
+* `RidgeRegressionModel`
+* `LassoRegressionModel`
+* `ElasticNetRegressionModel`
+* `BayesianRidgeRegressionModel`
 
 ### `MLModel` objects
 Each model registered to `ModelFactory` must be a concrete implementation of the `tabular_ml.base.MLModel` abstract base class.
@@ -89,26 +123,6 @@ def objective(
     """Controls optuna hyperparameter optimization behavior."""
     ...
 ```
-
-### Included `MLModel` implementations
-**[`catboost`](https://catboost.ai/en/docs/)**
-* `CatBoostRegressionModel`
-* `CatBoostClassificationModel`
-
-**[`xgboost`](https://xgboost.readthedocs.io/en/stable/python/index.html)**
-* `XGBoostRegressionModel`
-* `XGBoostClassificationModel`
-
-**[`lightgbm`](https://lightgbm.readthedocs.io/en/v3.3.2/)**
-* `LightGBMRegressionModel`
-* `LightGBMClassificationModel`
-
-**[`sklearn.linear_models`](https://scikit-learn.org/stable/modules/linear_model.html)**
-* `LinearRegressionModel`
-* `RidgeRegressionModel`
-* `LassoRegressionModel`
-* `ElasticNetRegressionModel`
-* `BayesianRidgeRegressionModel`
 
 ### Plug-in your custom model!
 To extend the functionality of this library one can simply "register" your custom `MLModel` implementation to `ModelFactory`. This is demonstrated below. Note that all `MLModel` functions and expended class variables must be present. Functions can remain empty if necessary.
