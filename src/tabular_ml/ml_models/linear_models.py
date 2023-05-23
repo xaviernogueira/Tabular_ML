@@ -278,7 +278,7 @@ class ElasticNetRegressionModel(BaseLinearModel):
                 param_ranges['alpha'][0],
                 param_ranges['alpha'][-1],
             ),
-            'l1_ratio': trial.suggest_uniform(
+            'l1_ratio': trial.suggest_float(
                 'l1_ratio',
                 param_ranges['l1_ratio'][0],
                 param_ranges['l1_ratio'][-1],
