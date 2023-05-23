@@ -13,6 +13,7 @@ from tabular_ml.functions import (
 
 __all__ = [
     'ModelFactory',
+    'MLModel',
     'k_fold_cv',
     'find_optimal_parameters',
 ]
