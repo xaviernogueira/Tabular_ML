@@ -22,9 +22,10 @@ This library is available on PyPI and can be easily pip installed into your envi
 ```
 pip install tabular_ml
 ```
+
 ## Using models
 
-### Included model offerings
+### See model offerings
 We use `tabular_ml.ModelFactory` to keep track of all supported regression and classification models. One can programmatically explore model offerings with the following functions:
 
 ```python
@@ -89,10 +90,7 @@ def objective(
     ...
 ```
 
-
-### Plugin your model
-As long as you follow the design
-### Currently supported models
+### Included `MLModel` implementations
 **[`catboost`](https://catboost.ai/en/docs/)**
 * `CatBoostRegressionModel`
 * `CatBoostClassificationModel`
@@ -103,6 +101,7 @@ As long as you follow the design
 
 **[`lightgbm`](https://lightgbm.readthedocs.io/en/v3.3.2/)**
 * `LightGBMRegressionModel`
+* `LightGBMClassificationModel`
 
 **[`sklearn.linear_models`](https://scikit-learn.org/stable/modules/linear_model.html)**
 * `LinearRegressionModel`
@@ -111,8 +110,32 @@ As long as you follow the design
 * `ElasticNetRegressionModel`
 * `BayesianRidgeRegressionModel`
 
-##
+### Plug-in your custom model!
+To extend the functionality of this library one can simply "register" your custom `MLModel` implementation to `ModelFactory`. This is demonstrated below. Note that all `MLModel` functions and expended class variables must be present. Functions can remain empty if necessary.
 
-## Optimize hyperparameters
+```python
+import tabular_ml
+
+# write a custom MLModel to import
+class CustomRegressionModel(tabular_ml.MLModel):
+    model_type = 'regression'
+    def train_model():
+        ...
+    def make_predictions():
+        ...
+    def train_and_predict():
+        ...
+    def optimize():
+        ...
+
+# register your MLModel to the factory!
+ModelFactory.register_model(CustomRegressionModel)
+```
+
+That said we highly encourage making a pull request and [contributing](#contribute) your custom `MLModel` such that it can be enjoyed by the world.
+
+## K-Fold Evaluation
+
+## Hyperparameter optimization w/ `optuna`
 
 ## Contribute

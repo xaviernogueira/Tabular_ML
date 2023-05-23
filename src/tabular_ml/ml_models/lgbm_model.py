@@ -191,3 +191,18 @@ class LightGBMRegressionModel(BaseLightGBMModel):
         'colsample_bytree': (0.5, 1.0),
         'num_boost_round': (250, 1500),
     }
+
+
+# @ModelFactory.implemented_model
+class LightGBMClassificationModel(BaseLightGBMModel):
+    model_type: ModelTypes = 'classification'
+    optuna_param_ranges: OptunaRangeDict = {
+        'objective': ['reg:squarederror'],
+        'eval_metric': ['mae'],
+        'early_stopping_rounds': (10, 100),
+        'lambda': (3, 8),
+        'learning_rate': (0.01, 0.4),
+        'max_depth': (2, 8),
+        'colsample_bytree': (0.5, 1.0),
+        'num_boost_round': (250, 1500),
+    }
