@@ -43,6 +43,12 @@ dependencies = [
     'lightgbm',
 ]
 
+dev-dependencies = [
+    'pytest',
+    'pre-commit',
+    'check-manifest',
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["tabular_ml*"]

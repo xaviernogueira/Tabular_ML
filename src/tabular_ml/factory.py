@@ -1,5 +1,4 @@
 import warnings
-import functools
 from tabular_ml.base import (
     MLModel,
     ModelTypes,

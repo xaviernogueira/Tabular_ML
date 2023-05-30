@@ -264,6 +264,55 @@ def k_fold_cv(
 ```
 
 ## Hyperparameter optimization w/ `optuna`
+[`Optuna`](https://optuna.org/) is an open-source hyperparameter optimization framework. This library provides a wrapper around `optuna` to make hyperparameter optimization as simple as calling `tabular_ml.find_optimal_parameters()` and passing in the necessary arguments. Under-the-hood, this function uses K-Fold CV to evaluate each trial in relation to a user-provided "metric function" (i.e., `sklearn.metrics.mae`).
+
+**Key Points:**
+* Pass in a model to optimize by setting param:`model` to it's factory registered name (i.e., "`CatBoostRegressionModel`").
+* A metric function must be passed in to evaluate the model! By default we use R-Squared for regression and AUC for classification. To use a custom metric function simply pass it into param:`metric_function`. The function should have the signature `f(y_true, y_preds, **kwargs) -> float`.
+* Each model has a default set of parameters to optimize, and range of values to. To override these defaults pass in a dictionary of custom ranges into param:`custom_optuna_ranges`. The dictionary should have parameter names as keys and a tuple of `(min_val, max_val)` as values. For example, to optimize `n_estimators` for `XGBoostRegressionModel` one could pass in `{'n_estimators': (100, 1000)}`.
+
+
+This function's arguments are shown below:
+```python
+def find_optimal_parameters(
+    model: str,
+    features: pd.DataFrame,
+    target: pd.Series,
+    metric_function: callable,
+    direction: Optional[str] = None,
+    n_trials: Optional[int] = None,
+    timeout: Optional[int] = None,
+    kfolds: Optional[int] = None,
+    weights: Optional[pd.Series] = None,
+    categorical_features: Optional[List[str]] = None,
+    random_state: Optional[int] = None,
+    custom_optuna_ranges: Optional[OptunaRangeDict] = None,
+    logging_file_path: Optional[str | Path] = None,
+) -> Dict[str, Any]:
+    """Runs optuna optimization for a MLModel.
+
+    Arguments:
+        model: A valid model name.
+            Valid names can be queried using ModelFactory.get_all_models().
+        features: A pandas DataFrame of features.
+        target: A pandas Series of targets.
+        metric_function: A function with the signature
+            f(y_true, y_preds, **kwargs) -> float.
+        direction: 'maximize' or 'minimize' the metric function.
+            If None, will infer direction from metric function.
+        n_trials: # of trials to run. Default is 20.
+        timeout: # of seconds to run.
+        kfolds: # of K-Folds. Default is 5.
+        weights: A pandas Series of training weights.
+        categorical_features: A list of categorical feature names.
+        random_state: Random state to use for K-Folds.
+        custom_optuna_ranges: A dict of custom optuna ranges.
+        logging_file_path: Path to a log file.
+
+    Returns:
+        A dict of optimal parameters for the model.
+    """
+```
 
 ## Examples
 ### Evaluating a regression model
