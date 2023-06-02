@@ -33,6 +33,7 @@ dependencies:
   - jupyterlab-lsp
   - python-lsp-server
   - pytest
+  - pytest-cov
   - pre-commit
 
   # library managment

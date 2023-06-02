@@ -35,7 +35,7 @@ jobs:
         shell: bash -l {0}
         run: >
           micromamba activate DEV_ENV
-          && pytest tests/ --cov
+          && pytest --cov=tabular_ml tests/
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
