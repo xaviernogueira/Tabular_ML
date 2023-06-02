@@ -123,6 +123,3 @@ def test_classification_models() -> None:
             data[pred_col],
             metric_function=sklearn.metrics.log_loss,
         )
-
-
-test_classification_models()
