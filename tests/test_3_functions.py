@@ -72,7 +72,7 @@ def test_regression_models() -> None:
     # get test regression data
     data = sklearn.datasets.load_diabetes(
         as_frame=True,
-    ).frame.fillna(0).iloc[:100]
+    ).frame.fillna(0).iloc[:300]
 
     pred_col = 'target'
 
@@ -101,7 +101,7 @@ def test_classification_models() -> None:
     # get test classification data
     data = sklearn.datasets.load_iris(
         as_frame=True,
-    ).frame.fillna(0).iloc[:100]
+    ).frame.fillna(0).iloc[:300]
 
     pred_col = 'target'
 
@@ -120,7 +120,3 @@ def test_classification_models() -> None:
             data[pred_col],
             metric_function=sklearn.metrics.log_loss,
         )
-
-
-test_regression_models()
-test_classification_models()

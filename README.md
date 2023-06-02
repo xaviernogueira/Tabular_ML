@@ -1,5 +1,6 @@
 [![Pre-Commit Status](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/pre-commit.yml)
 [![Tests Status](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/tests.yml/badge.svg)](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/tests.yml)
+[![Coverage](https://codecov.io/gh/xaviernogueira/Tabular_ML/graph/badge.svg)](https://codecov.io/gh/xaviernogueira/Tabular_ML)
 
 # `tabular_ml` - tabular machine learning simplified!
 I've packaged and open sourced my personal machine learning tools to speed up your next data science project.
