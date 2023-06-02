@@ -282,5 +282,4 @@ class CatBoostClassificationModel(BaseCatBoostModel):
             data=x_test,
             cat_features=categorical_features,
         )
-        class_idx = list(trained_model.classes_).index(1)
-        return trained_model.predict_proba(test_data_pool)[:, class_idx]
+        return trained_model.predict_proba(test_data_pool)

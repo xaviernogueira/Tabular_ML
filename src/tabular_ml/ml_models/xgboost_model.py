@@ -84,8 +84,9 @@ class BaseXGBoostModel(MLModel):
 
         return params
 
-    @staticmethod
+    @classmethod
     def train_model(
+        cls,
         x_train: pd.DataFrame,
         y_train: pd.Series,
         model_params: Dict[str, Any],
@@ -129,6 +130,17 @@ class BaseXGBoostModel(MLModel):
                 verbose_eval = model_params.pop('verbose_eval')
         else:
             verbose_eval = False
+
+        # enable multi-class prediction
+        if cls.model_type == 'classification':
+            num_classes = len(np.unique(y_train))
+            if num_classes <= 2:
+                model_params['objective'] = 'binary:logistic'
+                model_params['eval_metric'] = 'logloss'
+            else:
+                model_params['objective'] = 'multi:softprob'
+                model_params['eval_metric'] = 'mlogloss'
+                model_params['num_class'] = num_classes
 
         # return the trained model
         return xgboost.train(
@@ -267,7 +279,6 @@ class XGBoostClassificationModel(BaseXGBoostModel):
 
     model_type: ModelTypes = 'classification'
     optuna_param_ranges: OptunaRangeDict = {
-        'objective': ['binary:logistic'],
         'eval_metric': ['logloss'],
         'early_stopping_rounds': (10, 100),
         'lambda': (3, 8),

@@ -15,6 +15,7 @@ def k_fold_test(
     x_data: pd.DataFrame,
     y_data: pd.Series,
     metric_function: callable,
+    metric_function_kwargs: typing.Optional[dict] = None,
 ) -> None:
     # make model params dict (have them empty)
     model_params = {}
@@ -30,6 +31,7 @@ def k_fold_test(
         n_splits=3,
         random_state=1,
         metric_function=metric_function,
+        metric_function_kwargs=metric_function_kwargs,
     )
     assert isinstance(full_results, tabular_ml.KFoldOutput)
     for key, field in tabular_ml.KFoldOutput.__dataclass_fields__.items():
@@ -111,6 +113,7 @@ def test_classification_models() -> None:
         data.drop(columns=[pred_col]),
         data[pred_col],
         metric_function=sklearn.metrics.log_loss,
+        metric_function_kwargs={'labels': [0, 1, 2]},
     )
 
     for model_name in classification_models:
@@ -120,3 +123,6 @@ def test_classification_models() -> None:
             data[pred_col],
             metric_function=sklearn.metrics.log_loss,
         )
+
+
+test_classification_models()
