@@ -25,7 +25,7 @@ from tabular_ml.base import (
 )
 from tabular_ml.utilities import (
     get_optuna_ranges,
-    get_optuna_suggestion_type,
+    suggest_optuna_params,
 )
 from tabular_ml.factory import ModelFactory
 
@@ -42,54 +42,6 @@ class BaseCatBoostModel(MLModel):
     """
 
     model_type: ModelTypes = None
-
-    @staticmethod
-    def suggest_catboost_params(
-        trial: Trial,
-        optuna_param_ranges: OptunaRangeDict,
-    ) -> Dict[str, Any]:
-        """Suggest CatBoost parameters for optuna.
-
-        Shared between regression and classification models.
-
-        Arguments:
-            trial: the optuna trial object.
-            optuna_param_ranges: the model's optuna parameter ranges.
-
-        Returns:
-            The suggested parameters in a dictionary.
-        """
-
-        function_mapping = {
-            'learning_rate': trial.suggest_float,
-            'early_stopping_rounds': trial.suggest_int,
-            'depth': trial.suggest_int,
-            'bootstrap_type': trial.suggest_categorical,
-            'colsample_bylevel': trial.suggest_float,
-            'bagging_temperature': trial.suggest_float,
-            'subsample': trial.suggest_float,
-        }
-
-        params = {}
-        for param in optuna_param_ranges.keys():
-            if param not in function_mapping.keys():
-                function_mapping[param] = get_optuna_suggestion_type(
-                    trial,
-                    optuna_param_ranges[param],
-                )
-            if function_mapping[param].__name__ == 'suggest_categorical':
-                params[param] = function_mapping[param](
-                    param,
-                    optuna_param_ranges[param],
-                )
-            else:
-                params[param] = function_mapping[param](
-                    param,
-                    optuna_param_ranges[param][0],
-                    optuna_param_ranges[param][-1],
-                )
-
-        return params
 
     @classmethod
     def train_model(
@@ -186,9 +138,19 @@ class BaseCatBoostModel(MLModel):
         )
 
         # set up parameters
-        params = cls.suggest_catboost_params(
+        function_mapping = {
+            'learning_rate': trial.suggest_float,
+            'early_stopping_rounds': trial.suggest_int,
+            'depth': trial.suggest_int,
+            'bootstrap_type': trial.suggest_categorical,
+            'colsample_bylevel': trial.suggest_float,
+            'bagging_temperature': trial.suggest_float,
+            'subsample': trial.suggest_float,
+        }
+        params = suggest_optuna_params(
             trial,
             param_ranges,
+            function_mapping,
         )
 
         # trim parameters based on task type

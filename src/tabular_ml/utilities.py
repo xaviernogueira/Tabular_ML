@@ -11,13 +11,17 @@ from typing import (
     List,
     Tuple,
     Literal,
+    Any,
     Optional,
 )
 
-# TODO: add more metric directions
 MetricDirections: Dict[str, Literal['minimize', 'maximize']] = {
     'mean_absolute_error': 'minimize',
+    'max_error': 'minimize',
+    'accuracy': 'maximize',
+    'neg_mean_absolute_error': 'minimize',
     'log_loss': 'minimize',
+    'neg_log_loss': 'maximize',
     'r2_score': 'maximize',
 }
 
@@ -42,6 +46,35 @@ def get_optuna_suggestion_type(
         raise TypeError(
             f'Optuna suggestion type not implemented for value_range: {value_range}',
         )
+
+
+def suggest_optuna_params(
+    trial: Trial,
+    optuna_param_ranges: OptunaRangeDict,
+    function_mapping: Dict[str, OptunaSuggestionTypes],
+) -> Dict[str, Any]:
+    """Suggest parameters for optuna."""
+
+    params = {}
+    for param in optuna_param_ranges.keys():
+        if param not in function_mapping.keys():
+            function_mapping[param] = get_optuna_suggestion_type(
+                trial,
+                optuna_param_ranges[param],
+            )
+        if function_mapping[param].__name__ == 'suggest_categorical':
+            params[param] = function_mapping[param](
+                param,
+                optuna_param_ranges[param],
+            )
+        else:
+            params[param] = function_mapping[param](
+                param,
+                optuna_param_ranges[param][0],
+                optuna_param_ranges[param][-1],
+            )
+
+    return params
 
 
 def get_metric_direction(

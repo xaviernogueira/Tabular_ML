@@ -3,6 +3,7 @@ XGBoost Regression.
 """
 import xgboost
 import logging
+import warnings
 import pandas as pd
 import numpy as np
 from optuna.trial import Trial
@@ -22,8 +23,8 @@ from tabular_ml.base import (
     OptunaRangeDict,
 )
 from tabular_ml.utilities import (
-    get_optuna_suggestion_type,
     get_optuna_ranges,
+    suggest_optuna_params,
 )
 from tabular_ml.factory import ModelFactory
 
@@ -35,54 +36,6 @@ class BaseXGBoostModel(MLModel):
     Note that currently only XGBoost booster=gbtree is supported.
     """
     model_type = None
-
-    @staticmethod
-    def suggest_xgboost_params(
-        trial: Trial,
-        optuna_param_ranges: OptunaRangeDict,
-    ) -> Dict[str, Any]:
-        """Suggest XGBoost parameters for optuna.
-
-        Shared between regression and classification models.
-
-        Arguments:
-            trial: the optuna trial object.
-            optuna_param_ranges: the model's optuna parameter ranges.
-
-        Returns:
-            The suggested parameters in a dictionary.
-        """
-        function_mapping = {
-            'objective': trial.suggest_categorical,
-            'eval_metric': trial.suggest_categorical,
-            'early_stopping_rounds': trial.suggest_int,
-            'lambda': trial.suggest_int,
-            'learning_rate': trial.suggest_float,
-            'max_depth': trial.suggest_int,
-            'colsample_bytree': trial.suggest_float,
-            'num_boost_round': trial.suggest_int,
-        }
-
-        params = {}
-        for param in optuna_param_ranges.keys():
-            if param not in function_mapping.keys():
-                function_mapping[param] = get_optuna_suggestion_type(
-                    trial,
-                    optuna_param_ranges[param],
-                )
-            if function_mapping[param].__name__ == 'suggest_categorical':
-                params[param] = function_mapping[param](
-                    param,
-                    optuna_param_ranges[param],
-                )
-            else:
-                params[param] = function_mapping[param](
-                    param,
-                    optuna_param_ranges[param][0],
-                    optuna_param_ranges[param][-1],
-                )
-
-        return params
 
     @classmethod
     def train_model(
@@ -131,16 +84,12 @@ class BaseXGBoostModel(MLModel):
         else:
             verbose_eval = False
 
-        # enable multi-class prediction
+        # set up classification objective and eval metric
         if cls.model_type == 'classification':
-            num_classes = len(np.unique(y_train))
-            if num_classes <= 2:
-                model_params['objective'] = 'binary:logistic'
-                model_params['eval_metric'] = 'logloss'
-            else:
-                model_params['objective'] = 'multi:softprob'
-                model_params['eval_metric'] = 'mlogloss'
-                model_params['num_class'] = num_classes
+            model_params = cls._objective_and_eval(
+                model_params,
+                y_train,
+            )
 
         # return the trained model
         return xgboost.train(
@@ -193,8 +142,6 @@ class BaseXGBoostModel(MLModel):
         categorical_features: Optional[List[str]] = None,
     ) -> Tuple[xgboost.Booster, np.ndarray]:
 
-        # TODO: enable custom eval function!
-
         # train the model
         xgb_model = cls.train_model(
             x_train,
@@ -238,9 +185,20 @@ class BaseXGBoostModel(MLModel):
         )
 
         # set up parameters
-        params = cls.suggest_xgboost_params(
+        function_mapping = {
+            'objective': trial.suggest_categorical,
+            'eval_metric': trial.suggest_categorical,
+            'early_stopping_rounds': trial.suggest_int,
+            'lambda': trial.suggest_int,
+            'learning_rate': trial.suggest_float,
+            'max_depth': trial.suggest_int,
+            'colsample_bytree': trial.suggest_float,
+            'num_boost_round': trial.suggest_int,
+        }
+        params = suggest_optuna_params(
             trial,
             param_ranges,
+            function_mapping,
         )
 
         logging.info(f'\n----------------------\n{params}')
@@ -279,7 +237,6 @@ class XGBoostClassificationModel(BaseXGBoostModel):
 
     model_type: ModelTypes = 'classification'
     optuna_param_ranges: OptunaRangeDict = {
-        'eval_metric': ['logloss'],
         'early_stopping_rounds': (10, 100),
         'lambda': (3, 8),
         'learning_rate': (0.01, 0.4),
@@ -287,3 +244,44 @@ class XGBoostClassificationModel(BaseXGBoostModel):
         'colsample_bytree': (0.5, 1.0),
         'num_boost_round': (250, 1500),
     }
+
+    @staticmethod
+    def _objective_and_eval(
+        model_params: Dict[str, Any],
+        y_train: pd.Series,
+    ) -> Dict[str, Any]:
+        """Set objective and eval metric for classification."""
+
+        # identify whether we are doing binary or multi-class classification
+        num_classes = len(np.unique(y_train))
+        if not 'num_class' in model_params.keys():
+            model_params['num_class'] = num_classes
+        elif model_params['num_class'] != num_classes:
+            warnings.warn(
+                'Manually entered num_class does not match the number of classes in the data slice. '
+                'This may be OK due to stochastic data slice, but is likely an error.',
+            )
+
+        # set up appropriate objective and eval metric
+        if model_params['num_class'] <= 2:
+            if not 'objective' in model_params.keys():
+                model_params['objective'] = 'binary:logistic'
+            if not 'eval_metric' in model_params.keys():
+                model_params['eval_metric'] = 'logloss'
+            del model_params['num_class']
+
+        else:
+            if not 'objective' in model_params.keys():
+                model_params['objective'] = 'multi:softprob'
+            elif 'multi' not in model_params['objective']:
+                raise ValueError(
+                    'Must choose a multi-class classification suitable objective function.',
+                )
+
+            if not 'eval_metric' in model_params.keys():
+                model_params['eval_metric'] = 'mlogloss'
+            elif model_params['eval_metric'][0] != 'm':
+                raise ValueError(
+                    'Must choose a multi-class classification suitable eval metric.',
+                )
+        return model_params
