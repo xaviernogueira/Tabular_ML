@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61", "wheel", "setuptools_scm[toml]>=3.4"]
+requires = ["setuptools>=61", "wheel>=0.31.0", "setuptools_scm[toml]>=3.4"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -49,4 +49,4 @@ include = ["tabular_ml*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "tabular_ml.__version__"}
-readme = {file = "README.md"}
+readme = {file = "pypi_readme.md"}

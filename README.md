@@ -24,7 +24,7 @@ Train, evaluate, ensemble, and optimize hyperparameters from a standardized inte
     * [Model offerings](#model-offerings)
     * [Included `MLModel` implementations](#included-mlmodel-implementations)
     * [`MLModel` objects (included function documentation)](#mlmodel-objects)
-    * [Plug-in your custom model!](#plug-in-your-custom-model)
+    * [Plug-in your custom model](#plug-in-your-custom-model)
 3. [K-Fold Evaluation](#k-fold-evaluation)
 4. [Hyperparameter optimization w/ `optuna`](#hyperparameter-optimization-w-optuna)
 5. [Examples](#examples)
@@ -36,7 +36,7 @@ pip install tabular_ml
 ```
 
 ## Using models
-This library wraps each regression and classification model in a type=`tabular_ml.MLModel` object. This allows models to be used interchangeably without worrying about library specific nuance.
+This library wraps each regression and classification model in a type= `tabular_ml.MLModel` object. This allows models to be used interchangeably without worrying about library specific nuance.
 
 ### Model offerings
 We use `tabular_ml.ModelFactory` to keep track of all supported models. One can programmatically explore model offerings with the following functions:
