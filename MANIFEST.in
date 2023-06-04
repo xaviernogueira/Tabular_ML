@@ -2,7 +2,8 @@ exclude README.md
 exclude .pre-commit-config.yaml
 exclude .gitignore
 exclude environment.yml
+recursive-include images *
+recursive-exclude .github *
 recursive-exclude tests *
-recursive-exclude images *
-prune src/tabular_ml/__pycache__ *
+prune src/tabular_ml/__pycache__
 prune src/tabular_ml/ml_models/__pycache__
