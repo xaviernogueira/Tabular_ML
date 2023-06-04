@@ -1,6 +1,7 @@
 [![Pre-Commit Status](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/pre-commit.yml)
 [![Tests Status](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/tests.yml/badge.svg)](https://github.com/xaviernogueira/Tabular_ML/actions/workflows/tests.yml)
 [![Coverage](https://codecov.io/gh/xaviernogueira/Tabular_ML/graph/badge.svg)](https://codecov.io/gh/xaviernogueira/Tabular_ML)
+[![PyPI](https://img.shields.io/pypi/v/tabular_ml)](https://pypi.org/project/tabular_ml/)
 
 # `tabular_ml` - tabular machine learning simplified!
 I've packaged and open sourced my personal machine learning tools to speed up your next data science project.
@@ -32,7 +33,7 @@ Train, evaluate, ensemble, and optimize hyperparameters from a standardized inte
 ## Getting started
 This library is available on PyPI and can be easily pip installed into your environment.
 ```
-pip install tabular_ml
+pip install tabular-ml
 ```
 
 ## Using models
