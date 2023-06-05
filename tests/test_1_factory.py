@@ -35,3 +35,19 @@ def test_classification_models() -> None:
         classification_models[0],
     )
     assert issubclass(first_model_obj, tabular_ml.base.MLModel)
+
+
+def test_factory_methods() -> None:
+    """Test unregister_model and register_model methods."""
+
+    # get a copy of a model class
+    model_name = tabular_ml.ModelFactory.get_regression_models()[0]
+    model = tabular_ml.ModelFactory.get_regression_model(model_name)
+
+    # unregister the model
+    tabular_ml.ModelFactory.unregister_model(model_name)
+    assert model_name not in tabular_ml.ModelFactory.get_regression_models()
+
+    # re-register the model
+    tabular_ml.ModelFactory.register_model(model)
+    assert model_name in tabular_ml.ModelFactory.get_regression_models()
