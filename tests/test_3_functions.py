@@ -3,6 +3,7 @@
     * find_optimal_parameters()
 """
 import typing
+import pytest
 import sklearn
 import sklearn.datasets
 import sklearn.metrics
@@ -49,6 +50,7 @@ def optuna_test(
     x_data: pd.DataFrame,
     y_data: pd.Series,
     metric_function: callable,
+    custom_optuna_ranges: typing.Optional[dict] = None,
 ) -> None:
 
     try:
@@ -59,6 +61,7 @@ def optuna_test(
             metric_function,
             n_trials=2,
             kfolds=2,
+            custom_optuna_ranges=custom_optuna_ranges,
         )
         assert isinstance(out_dict, dict)
     except NotImplementedError:
@@ -86,11 +89,20 @@ def test_regression_models() -> None:
     )
 
     for model_name in regression_models:
+
+        # allow test coverage for custom optuna ranges
+        custom_optuna_ranges = None
+        if model_name == 'XGBoostRegressionModel':
+            custom_optuna_ranges = {
+                'early_stopping_rounds': (20, 90),
+            }
+
         optuna_test(
             model_name,
             data.drop(columns=[pred_col]),
             data[pred_col],
             metric_function=sklearn.metrics.r2_score,
+            custom_optuna_ranges=custom_optuna_ranges,
         )
 
 

@@ -41,9 +41,29 @@ class ModelFactory:
                 f'Expected one of {ModelTypes}, got {model.model_type}',
             )
         for func in MLModel.__abstractmethods__:
-            assert hasattr(model, func)
+            if not hasattr(model, func):
+                raise TypeError(
+                    f'Please provide a valid model implementation! '
+                    f'Model is missing {func} method.',
+                )
 
         cls.__registered_models[model.model_type][model.__name__] = model
+
+    @classmethod
+    def unregister_model(
+        cls,
+        model_name: str,
+    ) -> None:
+        """Un-registers a model."""
+        if model_name in cls.__registered_models['regression'].keys():
+            del cls.__registered_models['regression'][model_name]
+        elif model_name in cls.__registered_models['classification'].keys():
+            del cls.__registered_models['classification'][model_name]
+        else:
+            raise KeyError(
+                f'{model_name} is not a registered model name! '
+                f'Use ModelFactory.get_all_models() to see registered models.',
+            )
 
     @classmethod
     def get_all_models(cls) -> Dict[str, List[str]]:
