@@ -2,3 +2,4 @@ src/tabular_ml/__pycache__/**
 *.pyc
 tests/us_counties_metrics.parquet
 DEV_NOTES.md
+.vscode/**
